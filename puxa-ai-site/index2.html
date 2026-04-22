@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puxa.ai — Tecnologia para Vaquejada</title>
+  <meta name="description" content="A primeira plataforma de análise esportiva por vídeo e dados para a vaquejada. Métricas, VAR, Odd's, Hotspot e muito mais.">
+  <link rel="icon" href="assets/icone-app.jpg" type="image/jpeg">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+  <!-- ========== NAVIGATION ========== -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-logo">
+      <img src="assets/logo-horizontal-branco.png" alt="Puxa.ai">
+    </a>
+    <ul class="nav-menu">
+      <li><a href="#recursos">Recursos</a></li>
+      <li><a href="#var">VAR</a></li>
+      <li><a href="#metricas">Métricas</a></li>
+      <li><a href="#odds">Odd's</a></li>
+      <li><a href="#hotspot">Hotspot</a></li>
+      <li><a href="recursos.html">Plataforma</a></li>
+      <li><a href="/" class="nav-cta">Solicitar Acesso</a></li>
+    </ul>
+    <div class="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+  </nav>
+
+  <!-- ========== HERO SECTION ========== -->
+  <section class="hero" id="inicio">
+    <div class="hero-video-container">
+      <video id="hero-bg-video" autoplay muted loop playsinline>
+        <source src="assets/hero-video.mp4" type="video/mp4">
+      </video>
+    </div>
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content fade-in">
+      <div class="hero-badge">
+        <span class="dot"></span>
+        Plataforma em desenvolvimento
+      </div>
+      <h1>
+        A análise esportiva<br>
+        que a Vaquejada <span class="highlight">merece</span>
+      </h1>
+      <p class="hero-subtitle">
+        A primeira plataforma de inteligência de dados e análise por vídeo projetada exclusivamente para a vaquejada. Métricas de desempenho, sistema VAR, Odd's em tempo real e muito mais.
+      </p>
+      <div class="hero-buttons">
+        <a href="analisar.html#secao-upload" class="btn-primary">
+            <i class="fas fa-play"></i> Conheça os Recursos
+        </a>
+        <a href="#contato" class="btn-secondary">
+          <i class="fas fa-envelope"></i> Solicitar Acesso Antecipado
+        </a>
+      </div>
+    </div>
+
+    <div class="hero-scroll-indicator">
+      <span>Scroll</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ========== STATS BAR ========== -->
+  <div class="stats-bar">
+    <div class="stats-grid">
+      <div class="stat-item fade-in">
+        <h3><span data-target="6" data-suffix="+">0</span></h3>
+        <p>Recursos de Análise</p>
+      </div>
+      <div class="stat-item fade-in">
+        <h3><span data-target="100" data-suffix="%">0</span></h3>
+        <p>Focado em Vaquejada</p>
+      </div>
+      <div class="stat-item fade-in">
+        <h3><span data-target="360" data-suffix="°">0</span></h3>
+        <p>Visão Completa da Prova</p>
+      </div>
+      <div class="stat-item fade-in">
+        <h3>1<sup>o</sup></h3>
+        <p>VAR da Vaquejada</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== FEATURES / RECURSOS ========== -->
+  <section class="section section-dark" id="recursos">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-label">Recursos da Plataforma</span>
+        <h2 class="section-title">
+          Ferramentas que <span class="highlight">Transformam</span><br>a Análise da Vaquejada
+        </h2>
+        <p class="section-subtitle">
+          Cada recurso foi projetado para trazer ao esporte o mesmo nível de profissionalismo e precisão das maiores modalidades do mundo.
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <!-- Feature 1: Métricas do Esporte -->
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <i class="fas fa-chart-line" style="color: var(--laranja-ambar);"></i>
+          </div>
+          <h3>Métricas do Esporte</h3>
+          <p>Dados completos de cada prova: tempo de puxada, velocidade de entrada, distância percorrida, taxa de sucesso por faixa e muito mais. A vaquejada traduzida em números.</p>
+          <span class="feature-tag">Analytics</span>
+        </div>
+
+        <!-- Feature 2: Métricas Individualizadas -->
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <i class="fas fa-user-chart" style="color: var(--laranja-ambar);"></i>
+          </div>
+          <h3>Métricas Individualizadas</h3>
+          <p>Perfil de desempenho detalhado para cada vaqueiro e cada cavalo. Histórico de provas, evolução temporal, pontos fortes e oportunidades de melhoria.</p>
+          <span class="feature-tag">Performance</span>
+        </div>
+
+        <!-- Feature 3: VAR -->
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <i class="fas fa-video" style="color: var(--laranja-ambar);"></i>
+          </div>
+          <h3>Sistema VAR</h3>
+          <p>O primeiro sistema de Verificação por Vídeo da vaquejada. Múltiplos ângulos, replay em câmera lenta e análise frame a frame para decisões justas e transparentes.</p>
+          <span class="feature-tag">Pioneiro</span>
+        </div>
+
+        <!-- Feature 4: Odd's -->
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <i class="fas fa-calculator" style="color: var(--laranja-ambar);"></i>
+          </div>
+          <h3>Odd's Inteligentes</h3>
+          <p>Probabilidades calculadas com base em dados históricos, desempenho recente, condições da pista e perfil da dupla. Informação para decisões mais inteligentes.</p>
+          <span class="feature-tag">Data-Driven</span>
+        </div>
+
+        <!-- Feature 5: Mapa Hotspot -->
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <i class="fas fa-map-marked-alt" style="color: var(--laranja-ambar);"></i>
+          </div>
+          <h3>Mapa Hotspot e Trajeto Aéreo</h3>
+          <p>Visualização de cima da arena com mapa de calor e trajeto percorrido pelo boi e pelos cavalos. Identifique padrões, zonas de maior ação e estratégias de posicionamento.</p>
+          <span class="feature-tag">Geoespacial</span>
+        </div>
+
+        <!-- Feature 6: Banco de Dados -->
+        <div class="feature-card fade-in">
+          <div class="feature-icon">
+            <i class="fas fa-database" style="color: var(--laranja-ambar);"></i>
+          </div>
+          <h3>Banco de Dados Geral</h3>
+          <p>Acervo completo de provas, vaqueiros, cavalos e eventos. Consulte resultados históricos, compare desempenhos e acesse o maior banco de dados da vaquejada.</p>
+          <span class="feature-tag">Big Data</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== VAR SECTION ========== -->
+  <section class="section var-section" id="var">
+    <div class="container">
+      <div class="showcase">
+        <div class="showcase-content fade-in-left">
+          <div class="var-badge">
+            <i class="fas fa-shield-alt"></i> Exclusivo Puxa.ai
+          </div>
+          <span class="section-label">Sistema VAR</span>
+          <h2>O Primeiro <span class="highlight">VAR</span> da Vaquejada</h2>
+          <p>
+            Assim como o futebol evoluiu com a tecnologia de vídeo, a vaquejada agora conta com seu próprio sistema de verificação. O VAR da Puxa.ai utiliza múltiplas câmeras posicionadas estrategicamente na arena para capturar cada detalhe da prova.
+          </p>
+          <p>
+            Replay em câmera lenta, análise frame a frame e ângulos exclusivos que permitem uma avaliação precisa e imparcial. Mais transparência, mais justiça, mais profissionalismo.
+          </p>
+          <ul class="showcase-list">
+            <li><span class="check"><i class="fas fa-check"></i></span> Múltiplos ângulos de câmera sincronizados</li>
+            <li><span class="check"><i class="fas fa-check"></i></span> Replay em câmera lenta de alta definição</li>
+            <li><span class="check"><i class="fas fa-check"></i></span> Análise frame a frame com marcações</li>
+            <li><span class="check"><i class="fas fa-check"></i></span> Decisões mais justas e transparentes</li>
+            <li><span class="check"><i class="fas fa-check"></i></span> Integração com transmissão ao vivo</li>
+          </ul>
+          <a href="recursos.html#var-detail" class="btn-primary">
+            <i class="fas fa-play-circle"></i> Saiba Mais
+          </a>
+        </div>
+        <div class="showcase-image fade-in-right">
+          <div style="background: linear-gradient(135deg, #0d1f35, #1B2A4A); border-radius: 16px; padding: 2rem; position: relative; overflow: hidden;">
+            <!-- VAR Interface Mockup -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1rem;">
+              <div style="background: rgba(255,255,255,0.05); border-radius: 8px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(232,114,42,0.3);">
+                <div style="text-align: center;">
+                  <i class="fas fa-video" style="font-size: 1.5rem; color: var(--laranja-ambar); margin-bottom: 0.3rem;"></i>
+                  <div style="font-family: var(--font-tech); font-size: 0.65rem; color: var(--cinza-medio);">CAM 01</div>
+                </div>
+              </div>
+              <div style="background: rgba(255,255,255,0.05); border-radius: 8px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="text-align: center;">
+                  <i class="fas fa-video" style="font-size: 1.5rem; color: var(--azul-tech); margin-bottom: 0.3rem;"></i>
+                  <div style="font-family: var(--font-tech); font-size: 0.65rem; color: var(--cinza-medio);">CAM 02</div>
+                </div>
+              </div>
+              <div style="background: rgba(255,255,255,0.05); border-radius: 8px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="text-align: center;">
+                  <i class="fas fa-video" style="font-size: 1.5rem; color: var(--azul-tech); margin-bottom: 0.3rem;"></i>
+                  <div style="font-family: var(--font-tech); font-size: 0.65rem; color: var(--cinza-medio);">CAM 03</div>
+                </div>
+              </div>
+              <div style="background: rgba(255,255,255,0.05); border-radius: 8px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
+                <div style="text-align: center;">
+                  <i class="fas fa-helicopter" style="font-size: 1.5rem; color: var(--azul-tech); margin-bottom: 0.3rem;"></i>
+                  <div style="font-family: var(--font-tech); font-size: 0.65rem; color: var(--cinza-medio);">AÉREA</div>
+                </div>
+              </div>
+            </div>
+            <!-- Controls bar -->
+            <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0.8rem 1rem; display: flex; align-items: center; gap: 1rem; border: 1px solid rgba(255,255,255,0.08);">
+              <i class="fas fa-backward" style="color: var(--cinza-medio); font-size: 0.8rem;"></i>
+              <i class="fas fa-play" style="color: var(--laranja-ambar); font-size: 1rem;"></i>
+              <i class="fas fa-forward" style="color: var(--cinza-medio); font-size: 0.8rem;"></i>
+              <div style="flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; position: relative;">
+                <div style="width: 45%; height: 100%; background: var(--laranja-ambar); border-radius: 2px;"></div>
+              </div>
+              <span style="font-family: var(--font-tech); font-size: 0.7rem; color: var(--cinza-medio);">00:03:24</span>
+              <span style="font-family: var(--font-tech); font-size: 0.65rem; color: var(--laranja-ambar); background: rgba(232,114,42,0.15); padding: 0.2rem 0.5rem; border-radius: 4px;">0.25x</span>
+            </div>
+            <!-- VAR Badge -->
+            <div style="position: absolute; top: 1rem; right: 1rem; background: rgba(232,114,42,0.9); padding: 0.3rem 0.8rem; border-radius: 4px; font-family: var(--font-tech); font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;">VAR</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== MÉTRICAS SECTION ========== -->
+  <section class="section section-darker" id="metricas">
+    <div class="container">
+      <div class="showcase reverse">
+        <div class="showcase-content fade-in-right">
+          <span class="section-label">Análise de Desempenho</span>
+          <h2>Métricas que <span class="highlight">Revelam</span> o Invisível</h2>
+          <p>
+            Cada prova gera dezenas de dados que, até agora, se perdiam na poeira da arena. A Puxa.ai captura, processa e apresenta métricas detalhadas do esporte, do vaqueiro e do cavalo, transformando informação bruta em inteligência competitiva.
+          </p>
+          <ul class="showcase-list">
+            <li><span class="check"><i class="fas fa-check"></i></span> Tempo de reação na largada</li>
+            <li><span class="check"><i class="fas fa-check"></i></span> Velocidade de aproximação e puxada</li>
+            <li><span class="check"><i class="fas fa-check"></i></span> Taxa de sucesso por faixa</li>
+            <li><span class="check"><i class="fas fa-check"></i></span> Perfil individual de vaqueiro e cavalo</li>
+            <li><span class="check"><i class="fas fa-check"></i></span> Comparativo entre competidores</li>
+          </ul>
+          <a href="recursos.html#metricas-detail" class="btn-primary">
+            <i class="fas fa-chart-bar"></i> Explorar Métricas
+          </a>
+        </div>
+        <div class="showcase-image fade-in-left">
+          <!-- Metrics Dashboard Mockup -->
+          <div style="background: linear-gradient(135deg, #0d1f35, #1B2A4A); border-radius: 16px; padding: 2rem; border: 1px solid rgba(255,255,255,0.08);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+              <div>
+                <div style="font-family: var(--font-heading); font-weight: 700; font-size: 1rem;">Dashboard de Prova</div>
+                <div style="font-family: var(--font-tech); font-size: 0.7rem; color: var(--cinza-medio);">Etapa Final — Parque Arena Norte</div>
+              </div>
+              <div style="display: flex; gap: 0.5rem;">
+                <span style="background: rgba(74,222,128,0.15); color: #4ade80; font-family: var(--font-tech); font-size: 0.65rem; padding: 0.2rem 0.6rem; border-radius: 4px;">AO VIVO</span>
+              </div>
+            </div>
+            <!-- Mini metrics -->
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-bottom: 1.5rem;">
+              <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; text-align: center;">
+                <div style="font-family: var(--font-tech); font-weight: 700; font-size: 1.5rem; color: var(--laranja-ambar);">3.2s</div>
+                <div style="font-size: 0.7rem; color: var(--cinza-medio); margin-top: 0.2rem;">Tempo Médio</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; text-align: center;">
+                <div style="font-family: var(--font-tech); font-weight: 700; font-size: 1.5rem; color: var(--laranja-ambar);">78%</div>
+                <div style="font-size: 0.7rem; color: var(--cinza-medio); margin-top: 0.2rem;">Taxa Sucesso</div>
+              </div>
+              <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; text-align: center;">
+                <div style="font-family: var(--font-tech); font-weight: 700; font-size: 1.5rem; color: var(--laranja-ambar);">42km/h</div>
+                <div style="font-size: 0.7rem; color: var(--cinza-medio); margin-top: 0.2rem;">Vel. Máxima</div>
+              </div>
+            </div>
+            <!-- Chart placeholder -->
+            <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 1rem; border: 1px solid rgba(255,255,255,0.05);">
+              <div style="font-size: 0.75rem; color: var(--cinza-medio); margin-bottom: 0.8rem; font-family: var(--font-heading); font-weight: 600;">Desempenho por Rodada</div>
+              <svg viewBox="0 0 400 120" style="width: 100%; height: auto;">
+                <defs>
+                  <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#E8722A" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="#E8722A" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <path d="M0,80 L50,60 L100,70 L150,40 L200,50 L250,25 L300,35 L350,15 L400,20" fill="none" stroke="#E8722A" stroke-width="2"/>
+                <path d="M0,80 L50,60 L100,70 L150,40 L200,50 L250,25 L300,35 L350,15 L400,20 L400,120 L0,120Z" fill="url(#chartGrad)"/>
+                <circle cx="250" cy="25" r="4" fill="#E8722A"/>
+                <circle cx="350" cy="15" r="4" fill="#E8722A"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== ODD'S SECTION ========== -->
+  <section class="section section-dark" id="odds">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-label">Inteligência Preditiva</span>
+        <h2 class="section-title">
+          Odd's em <span class="highlight">Tempo Real</span>
+        </h2>
+        <p class="section-subtitle">
+          Probabilidades calculadas por algoritmos proprietários, alimentados por dados históricos e variáveis em tempo real de cada competição.
+        </p>
+      </div>
+
+      <div class="odds-demo fade-in">
+        <div class="odds-header">
+          <h4><i class="fas fa-trophy" style="color: var(--laranja-ambar); margin-right: 0.5rem;"></i> Disputa Profissional — Etapa Arena Norte 2026</h4>
+          <div class="odds-live">
+            <span class="dot"></span>
+            LIVE
+          </div>
+        </div>
+        <table class="odds-table">
+          <thead>
+            <tr>
+              <th>Dupla</th>
+              <th>Cavalo (Puxador)</th>
+              <th>Odd Puxada</th>
+              <th>Odd Classificação</th>
+              <th>Tendência</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>R. Nogueira / L. Campos</strong></td>
+              <td>Relâmpago do Norte</td>
+              <td><span class="odds-value">1.85</span></td>
+              <td><span class="odds-value">2.10</span></td>
+              <td><span class="odds-change up"><i class="fas fa-arrow-up"></i> +0.12</span></td>
+            </tr>
+            <tr>
+              <td><strong>F. Cavalcanti / M. Silva</strong></td>
+              <td>Trovão da Serra</td>
+              <td><span class="odds-value">2.30</span></td>
+              <td><span class="odds-value">3.15</span></td>
+              <td><span class="odds-change down"><i class="fas fa-arrow-down"></i> -0.08</span></td>
+            </tr>
+            <tr>
+              <td><strong>J. Almeida / P. Santos</strong></td>
+              <td>Ventania Real</td>
+              <td><span class="odds-value">3.50</span></td>
+              <td><span class="odds-value">4.20</span></td>
+              <td><span class="odds-change up"><i class="fas fa-arrow-up"></i> +0.05</span></td>
+            </tr>
+            <tr>
+              <td><strong>D. Ferreira / A. Costa</strong></td>
+              <td>Estrela do Sertão</td>
+              <td><span class="odds-value">4.10</span></td>
+              <td><span class="odds-value">5.80</span></td>
+              <td><span class="odds-change down"><i class="fas fa-arrow-down"></i> -0.15</span></td>
+            </tr>
+            <tr>
+              <td><strong>C. Ribeiro / T. Oliveira</strong></td>
+              <td>Furacão de Aço</td>
+              <td><span class="odds-value">5.25</span></td>
+              <td><span class="odds-value">7.40</span></td>
+              <td><span class="odds-change up"><i class="fas fa-arrow-up"></i> +0.22</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p style="text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: var(--cinza-medio); font-family: var(--font-tech);">
+        * Dados simulados para demonstração. Odd's reais serão calculadas com base em dados históricos verificados.
+      </p>
+    </div>
+  </section>
+
+  <!-- ========== HOTSPOT / MAPA SECTION ========== -->
+  <section class="section section-darker" id="hotspot">
+    <div class="container">
+      <div class="showcase">
+        <div class="showcase-content fade-in-left">
+          <span class="section-label">Visão Aérea</span>
+          <h2>Mapa <span class="highlight">Hotspot</span> e Trajeto</h2>
+          <p>
+            Pela primeira vez na história da vaquejada, é possível visualizar de cima toda a dinâmica da prova. O mapa de calor revela as zonas de maior concentração de ação, enquanto o trajeto mostra o caminho exato percorrido por cada animal e competidor.
+          </p>
+          <ul class="showcase-list">
+            <li><span class="check"><i class="fas fa-check"></i></span> Mapa de calor da arena em tempo real</li>
+            <li><span class="check"><i class="fas fa-check"></i></span> Trajeto do boi e dos cavalos</li>
+            <li><span class="check"><i class="fas fa-check"></i></span> Zonas de puxada bem-sucedida</li>
+            <li><span class="check"><i class="fas fa-check"></i></span> Análise de posicionamento estratégico</li>
+            <li><span class="check"><i class="fas fa-check"></i></span> Exportação de dados geoespaciais</li>
+          </ul>
+          <a href="recursos.html#hotspot-detail" class="btn-primary">
+            <i class="fas fa-map"></i> Ver Demonstração
+          </a>
+        </div>
+        <div class="showcase-image fade-in-right">
+          <!-- Arena Hotspot Mockup -->
+          <div style="background: linear-gradient(135deg, #0d1f35, #1B2A4A); border-radius: 16px; padding: 2rem; border: 1px solid rgba(255,255,255,0.08); position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+              <div style="font-family: var(--font-heading); font-weight: 700; font-size: 0.9rem;">Vista Aérea — Arena</div>
+              <div style="font-family: var(--font-tech); font-size: 0.65rem; color: var(--laranja-ambar);">HOTSPOT ATIVO</div>
+            </div>
+            <svg viewBox="0 0 500 300" style="width: 100%; border-radius: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
+              <!-- Arena outline -->
+              <rect x="30" y="30" width="440" height="240" rx="8" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="5,5"/>
+              <!-- Faixas -->
+              <line x1="180" y1="30" x2="180" y2="270" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+              <line x1="320" y1="30" x2="320" y2="270" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+              <!-- Labels -->
+              <text x="105" y="20" fill="rgba(255,255,255,0.3)" font-size="10" font-family="Space Mono" text-anchor="middle">LARGADA</text>
+              <text x="250" y="20" fill="rgba(255,255,255,0.3)" font-size="10" font-family="Space Mono" text-anchor="middle">PISTA</text>
+              <text x="390" y="20" fill="rgba(255,255,255,0.3)" font-size="10" font-family="Space Mono" text-anchor="middle">FAIXA</text>
+              <!-- Heat spots -->
+              <circle cx="350" cy="150" r="60" fill="rgba(232,114,42,0.25)" class="heat-dot"/>
+              <circle cx="350" cy="150" r="35" fill="rgba(232,114,42,0.35)" class="heat-dot"/>
+              <circle cx="350" cy="150" r="15" fill="rgba(232,114,42,0.5)" class="heat-dot"/>
+              <circle cx="200" cy="120" r="40" fill="rgba(46,91,186,0.2)" class="heat-dot"/>
+              <circle cx="200" cy="120" r="20" fill="rgba(46,91,186,0.3)" class="heat-dot"/>
+              <circle cx="120" cy="150" r="30" fill="rgba(46,91,186,0.15)" class="heat-dot"/>
+              <!-- Trajectory -->
+              <path d="M80,150 C120,140 160,110 200,120 S280,160 350,150 S420,130 450,140" fill="none" stroke="#E8722A" stroke-width="2" stroke-dasharray="4,3" opacity="0.8"/>
+              <path d="M80,160 C130,170 170,130 210,135 S290,170 360,155 S430,145 460,150" fill="none" stroke="#2E5BBA" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+              <!-- Points -->
+              <circle cx="80" cy="150" r="5" fill="#4ade80"/>
+              <circle cx="450" cy="140" r="5" fill="#f87171"/>
+              <!-- Legend -->
+              <rect x="30" y="275" width="8" height="8" rx="2" fill="#E8722A"/>
+              <text x="42" y="283" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inter">Boi</text>
+              <rect x="80" y="275" width="8" height="8" rx="2" fill="#2E5BBA"/>
+              <text x="92" y="283" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inter">Puxador</text>
+              <rect x="140" y="275" width="8" height="8" rx="2" fill="#4ade80"/>
+              <text x="152" y="283" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inter">Início</text>
+              <rect x="190" y="275" width="8" height="8" rx="2" fill="#f87171"/>
+              <text x="202" y="283" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inter">Fim</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== DATABASE SECTION ========== -->
+  <section class="section section-dark" id="database">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-label">Banco de Dados</span>
+        <h2 class="section-title">
+          O Maior <span class="highlight">Acervo</span> da Vaquejada
+        </h2>
+        <p class="section-subtitle">
+          Consulte, compare e analise dados de milhares de provas, vaqueiros e cavalos em uma única plataforma centralizada.
+        </p>
+      </div>
+
+      <div class="db-features fade-in">
+        <div class="db-card">
+          <div class="db-icon"><i class="fas fa-users"></i></div>
+          <h4>Cadastro de Vaqueiros</h4>
+          <p>Perfil completo com histórico de provas, estatísticas de desempenho e ranking atualizado.</p>
+        </div>
+        <div class="db-card">
+          <div class="db-icon"><i class="fas fa-horse-head"></i></div>
+          <h4>Cadastro de Cavalos</h4>
+          <p>Ficha técnica de cada animal com linhagem, desempenho por pista e compatibilidade com vaqueiros.</p>
+        </div>
+        <div class="db-card">
+          <div class="db-icon"><i class="fas fa-calendar-alt"></i></div>
+          <h4>Histórico de Eventos</h4>
+          <p>Registro completo de todas as competições com resultados, classificações e estatísticas detalhadas.</p>
+        </div>
+        <div class="db-card">
+          <div class="db-icon"><i class="fas fa-search"></i></div>
+          <h4>Busca Avançada</h4>
+          <p>Filtros inteligentes por nome, região, período, categoria e múltiplos critérios de desempenho.</p>
+        </div>
+        <div class="db-card">
+          <div class="db-icon"><i class="fas fa-chart-pie"></i></div>
+          <h4>Relatórios Analíticos</h4>
+          <p>Geração automática de relatórios com gráficos, comparativos e insights baseados em dados.</p>
+        </div>
+        <div class="db-card">
+          <div class="db-icon"><i class="fas fa-cloud-download-alt"></i></div>
+          <h4>Exportação de Dados</h4>
+          <p>Exporte dados em múltiplos formatos para análises externas, apresentações e relatórios personalizados.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== TESTIMONIALS ========== -->
+  <section class="section section-darker">
+    <div class="container">
+      <div class="section-header fade-in">
+        <span class="section-label">Depoimentos</span>
+        <h2 class="section-title">
+          O que Dizem os <span class="highlight">Profissionais</span>
+        </h2>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
+        <div class="testimonial-card fade-in">
+          <div class="quote-mark">&ldquo;</div>
+          <blockquote>
+            A vaquejada sempre mereceu esse nível de profissionalismo. A Puxa.ai está trazendo para o nosso esporte o que o futebol já tem há anos. Isso vai mudar completamente a forma como enxergamos cada prova.
+          </blockquote>
+          <div class="testimonial-author">
+            <div class="avatar">RN</div>
+            <div class="info">
+              <h4>Ricardo Nogueira</h4>
+              <p>Vaqueiro Profissional — 15 anos de carreira</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card fade-in">
+          <div class="quote-mark">&ldquo;</div>
+          <blockquote>
+            Como organizador de eventos, ter acesso a dados em tempo real e um sistema VAR é um divisor de águas. Isso eleva a credibilidade e a transparência de toda a competição.
+          </blockquote>
+          <div class="testimonial-author">
+            <div class="avatar">MC</div>
+            <div class="info">
+              <h4>Marcos Cavalcanti</h4>
+              <p>Organizador — Parque Arena Norte</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== CTA SECTION ========== -->
+  <section class="cta-section" id="contato">
+    <h2 class="fade-in">Pronto para Elevar a Vaquejada<br>a Outro Patamar?</h2>
+    <p class="fade-in">Solicite acesso antecipado à plataforma e seja um dos primeiros a experimentar o futuro da análise esportiva na vaquejada.</p>
+    <a href="mailto:contato@puxa.ai" class="btn-primary fade-in">
+      <i class="fas fa-rocket"></i> Solicitar Acesso Antecipado
+    </a>
+  </section>
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <img src="assets/logo-horizontal-branco.png" alt="Puxa.ai">
+        <p>Tecnologia de ponta para a vaquejada. Inovação, seriedade e confiabilidade para o esporte que é paixão de milhões de brasileiros.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Plataforma</h4>
+        <ul>
+          <li><a href="#recursos">Recursos</a></li>
+          <li><a href="#var">Sistema VAR</a></li>
+          <li><a href="#metricas">Métricas</a></li>
+          <li><a href="#odds">Odd's</a></li>
+          <li><a href="#hotspot">Hotspot</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Empresa</h4>
+        <ul>
+          <li><a href="recursos.html">Sobre a Plataforma</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Carreiras</a></li>
+          <li><a href="#">Imprensa</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contato</h4>
+        <ul>
+          <li><a href="mailto:contato@puxa.ai">contato@puxa.ai</a></li>
+          <li><a href="#">Instagram</a></li>
+          <li><a href="#">LinkedIn</a></li>
+          <li><a href="#">YouTube</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 Puxa.ai — Todos os direitos reservados.</p>
+      <span class="tech-text">Puxa<span style="color: var(--laranja-ambar);">.ai</span> // Tecnologia para Vaquejada</span>
+    </div>
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

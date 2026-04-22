@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload Designer — Puxa.ai</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="puxa-ai-site/style2.css">
+</head>
+<body>
+
+  <!-- ========== NAVBAR ========== -->
+  <nav class="navbar">
+    <div class="nav-status">
+      <span class="status-dot"></span>
+      Sistema Online
+    </div>
+  </nav>
+
+  <!-- ========== MAIN CONTAINER ========== -->
+  <main class="main-container" id="secao-upload">
+
+    <!-- Left Panel: Upload Area -->
+    <section class="upload-panel">
+      <div class="panel-header">
+        <h2><i class="fas fa-upload"></i> Enviar Arquivos</h2>
+        <p>Arraste e solte ou clique para selecionar</p>
+      </div>
+
+      <!-- Drop Zone -->
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-zone-content">
+          <div class="drop-icon">
+            <i class="fas fa-cloud-upload-alt"></i>
+          </div>
+          <h3>Arraste seus arquivos aqui</h3>
+          <p>ou clique para selecionar do computador</p>
+          <div class="drop-formats">
+            <span class="format-tag"><i class="fas fa-video"></i> MP4</span>
+            <span class="format-tag"><i class="fas fa-image"></i> JPG/PNG</span>
+            <span class="format-tag"><i class="fas fa-file-pdf"></i> PDF</span>
+            <span class="format-tag"><i class="fas fa-file-csv"></i> CSV</span>
+            <span class="format-tag"><i class="fas fa-file-alt"></i> DOC</span>
+          </div>
+          <button class="btn-select" id="btnSelect">
+            <i class="fas fa-folder-open"></i> Selecionar Arquivos
+          </button>
+        </div>
+        <div class="drop-zone-active">
+          <i class="fas fa-bullseye"></i>
+          <span>Solte aqui!</span>
+        </div>
+        <input type="file" id="fileInput" multiple hidden>
+      </div>
+
+      <!-- Upload Options -->
+      <div class="upload-options">
+        <div class="option-group">
+          <label class="option-label">
+            <i class="fas fa-tag"></i> Categoria
+          </label>
+          <select class="option-select" id="categorySelect">
+            <option value="prova">Vídeo de Prova</option>
+            <option value="metricas">Dados de Métricas</option>
+            <option value="perfil">Foto de Perfil</option>
+            <option value="documento">Documento</option>
+            <option value="outro">Outro</option>
+          </select>
+        </div>
+        <div class="option-group">
+          <label class="option-label">
+            <i class="fas fa-calendar"></i> Evento
+          </label>
+          <input type="text" class="option-input" placeholder="Ex: Arena Norte 2026" id="eventInput">
+        </div>
+        <div class="option-group">
+          <label class="option-label">
+            <i class="fas fa-sticky-note"></i> Observações
+          </label>
+          <textarea class="option-textarea" placeholder="Notas sobre o upload..." id="notesInput" rows="2"></textarea>
+        </div>
+      </div>
+    </section>
+
+    <!-- Right Panel: File Queue & Progress -->
+    <section class="queue-panel">
+      <div class="panel-header">
+        <h2><i class="fas fa-list-ul"></i> Fila de Uploads</h2>
+        <div class="queue-stats">
+          <span class="stat" id="totalFiles">0 arquivos</span>
+          <span class="stat-divider">|</span>
+          <span class="stat" id="totalSize">0 MB</span>
+        </div>
+      </div>
+
+      <!-- Queue List -->
+      <div class="queue-list" id="queueList">
+        <div class="queue-empty" id="queueEmpty">
+          <i class="fas fa-inbox"></i>
+          <p>Nenhum arquivo na fila</p>
+          <span>Adicione arquivos usando o painel ao lado</span>
+        </div>
+      </div>
+
+      <!-- Upload Actions -->
+      <div class="upload-actions" id="uploadActions" style="display: none;">
+        <div class="progress-global">
+          <div class="progress-info">
+            <span id="progressText">0% concluído</span>
+            <span id="progressSpeed">0 MB/s</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="progressBar"></div>
+          </div>
+        </div>
+        <div class="action-buttons">
+          <button class="btn-clear" id="btnClear">
+            <i class="fas fa-trash-alt"></i> Limpar Fila
+          </button>
+          <button type="button" class="btn-upload" id="btnUpload">
+              <i class="fas fa-rocket"></i> Enviar Todos
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========== TOAST CONTAINER ========== -->
+  <div class="toast-container" id="toastContainer"></div>
+  <script type="module" src="puxa-ai-site/script.js"></script>
+</body>
+</html>

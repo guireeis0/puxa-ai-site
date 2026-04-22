@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Puxa.ai — VAR</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { background: #0d1b2e; color: #e5e7eb; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; margin: 0; }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 2rem 1.25rem; }
+
+    h1  { font-size: 1.35rem; font-weight: 600; color: #fff; margin: 0 0 .2rem; }
+    .sub { font-size: .82rem; color: #6b7280; margin: 0 0 1.75rem; }
+
+    /* ── error banner ── */
+    .err {
+      background: rgba(248,113,113,.1); border: 1px solid rgba(248,113,113,.3);
+      color: #f87171; border-radius: 8px; padding: .65rem 1rem;
+      font-size: .82rem; display: none; margin-bottom: 1rem;
+    }
+
+    /* ── upload ── */
+    .drop-zone {
+      border: 1.5px dashed rgba(232,114,42,.45); border-radius: 12px;
+      padding: 2.5rem; text-align: center; cursor: pointer;
+      transition: border-color .2s, background .2s; margin-bottom: 1.5rem;
+    }
+    .drop-zone:hover, .drop-zone.over { border-color: #E8722A; background: rgba(232,114,42,.05); }
+    .drop-zone input { display: none; }
+    .drop-zone p { margin: .3rem 0; color: #9ca3af; font-size: .85rem; }
+    .drop-zone .fname { color: #E8722A; font-size: .82rem; margin-top: .4rem; }
+
+    /* ── processing ── */
+    .processing-card {
+      background: rgba(255,255,255,.03); border: 1px solid #1e3a5f;
+      border-radius: 12px; padding: 2rem; text-align: center; margin-bottom: 1.5rem;
+    }
+    .processing-card h3 { margin: .75rem 0 .4rem; font-size: 1rem; color: #fff; }
+    .processing-card p  { font-size: .82rem; color: #9ca3af; margin: 0 0 1.25rem; }
+    .proc-track {
+      height: 8px; background: rgba(255,255,255,.08);
+      border-radius: 99px; overflow: hidden; margin-bottom: .5rem;
+    }
+    .proc-fill {
+      height: 100%; background: #E8722A; border-radius: 99px;
+      width: 0%; transition: width .4s ease;
+    }
+    .proc-pct { font-size: .78rem; color: #E8722A; }
+
+    /* ── video container (shared) ── */
+    .vid-container {
+      position: relative; overflow: hidden;
+      border-radius: 10px; border: 1px solid #1e3a5f;
+      background: #000; aspect-ratio: 16/9;
+      margin-bottom: .75rem; cursor: default;
+    }
+    .vid-container.grab    { cursor: grab; }
+    .vid-container.grabbing { cursor: grabbing !important; }
+    .vid-container.crosshair { cursor: crosshair; }
+
+    video#vid {
+      width: 100%; height: 100%; display: block; object-fit: contain;
+      transform-origin: center; transition: transform .1s ease;
+      user-select: none; pointer-events: none;
+    }
+    #overlayCanvas {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+    }
+    #setupCanvas {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+    }
+
+    /* ── lane setup ── */
+    .lane-instructions {
+      background: rgba(232,114,42,.08); border: 1px solid rgba(232,114,42,.25);
+      border-radius: 8px; padding: .75rem 1rem; font-size: .84rem;
+      color: #f3a96a; margin-bottom: .75rem;
+    }
+    .lane-instructions strong { color: #E8722A; }
+    #laneHint { font-size: .78rem; color: #9ca3af; margin-top: .25rem; }
+    .lane-btn-row { display: flex; gap: 10px; margin-bottom: 1rem; }
+
+    /* ── zoom row ── */
+    .zoom-row { display: flex; align-items: center; gap: 8px; margin-bottom: .75rem; flex-wrap: wrap; }
+    .zoom-label { font-size: .75rem; color: #6b7280; white-space: nowrap; }
+    #zoomSlider { flex: 1; min-width: 100px; max-width: 160px; accent-color: #E8722A; cursor: pointer; }
+    #zoomVal { font-size: .78rem; color: #E8722A; min-width: 32px; text-align: right; }
+
+    /* ── progress bar ── */
+    .prog-track {
+      position: relative; height: 6px; background: rgba(255,255,255,.08);
+      border-radius: 99px; cursor: pointer; margin-bottom: .6rem;
+    }
+    .prog-fill { height: 100%; background: #E8722A; border-radius: 99px; pointer-events: none; width: 0%; }
+    .prog-marks { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+    .prog-mark {
+      position: absolute; top: -3px; width: 12px; height: 12px;
+      border-radius: 50%; transform: translateX(-50%); cursor: pointer;
+      pointer-events: all; border: 2px solid #0d1b2e;
+    }
+    .prog-mark.valido { background: #32dc64; }
+    .prog-mark.zero   { background: #f87171; }
+
+    /* ── time ── */
+    .time-row { display: flex; justify-content: space-between; font-size: .75rem; color: #6b7280; margin-bottom: .75rem; }
+
+    /* ── controls ── */
+    .controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 1.25rem; }
+    .ctrl-btn {
+      background: rgba(255,255,255,.05); border: 1px solid #1e3a5f;
+      color: #d1d5db; border-radius: 8px; padding: 6px 12px;
+      font-size: .82rem; cursor: pointer; transition: background .15s, border-color .15s;
+      white-space: nowrap;
+    }
+    .ctrl-btn:hover  { background: rgba(255,255,255,.1); border-color: #E8722A; color: #fff; }
+    .ctrl-btn.active { border-color: #E8722A; color: #E8722A; }
+    .ctrl-sep { width: 1px; height: 24px; background: rgba(255,255,255,.1); margin: 0 4px; }
+
+    /* ── mark buttons ── */
+    .mark-row { display: flex; gap: 12px; margin-bottom: 1.5rem; }
+    .mark-btn {
+      flex: 1; padding: .7rem; font-size: 1rem; font-weight: 600;
+      border: none; border-radius: 10px; cursor: pointer; transition: opacity .15s;
+    }
+    .mark-btn:hover   { opacity: .85; }
+    .mark-btn.valido  { background: #16a34a; color: #fff; }
+    .mark-btn.zero    { background: #dc2626; color: #fff; }
+
+    /* ── timeline ── */
+    .tl-header { font-size: .78rem; color: #6b7280; text-transform: uppercase; letter-spacing: .5px; margin-bottom: .6rem; }
+    .tl-list   { display: flex; flex-direction: column; gap: 6px; }
+    .tl-item {
+      display: flex; align-items: center; gap: 10px;
+      background: rgba(255,255,255,.03); border: 1px solid #1e3a5f;
+      border-radius: 8px; padding: 8px 12px;
+    }
+    .tl-badge {
+      font-size: .75rem; font-weight: 700; padding: 2px 9px;
+      border-radius: 99px; white-space: nowrap; min-width: 54px; text-align: center;
+    }
+    .tl-badge.valido { background: rgba(50,220,100,.15); color: #32dc64; }
+    .tl-badge.zero   { background: rgba(248,113,113,.15); color: #f87171; }
+    .tl-time  { font-size: .82rem; color: #9ca3af; font-variant-numeric: tabular-nums; }
+    .tl-note  { font-size: .78rem; color: #6b7280; flex: 1; }
+    .tl-actions { display: flex; gap: 6px; margin-left: auto; }
+    .tl-btn {
+      font-size: .72rem; padding: 3px 9px; border-radius: 6px;
+      border: 1px solid #374151; background: none; color: #9ca3af; cursor: pointer;
+    }
+    .tl-btn:hover { border-color: #E8722A; color: #E8722A; }
+    .tl-empty { font-size: .82rem; color: #4b5563; text-align: center; padding: 1rem 0; }
+
+    /* ── fall modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.7);
+      display: none; align-items: center; justify-content: center; z-index: 100;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-card {
+      background: #0f2035; border: 1px solid #E8722A;
+      border-radius: 14px; padding: 2rem 2.5rem; max-width: 420px;
+      text-align: center; box-shadow: 0 8px 40px rgba(0,0,0,.6);
+    }
+    .modal-icon { font-size: 2.5rem; margin-bottom: .5rem; }
+    .modal-card h3 { font-size: 1.15rem; color: #fff; margin: 0 0 .4rem; }
+    .modal-card p  { font-size: .88rem; color: #9ca3af; margin: 0 0 1.5rem; }
+    .modal-btns { display: flex; gap: 12px; justify-content: center; }
+    .modal-btns .mark-btn { flex: 0 0 auto; padding: .65rem 1.5rem; font-size: .9rem; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>VAR — Vaquejada</h1>
+  <p class="sub">Replay com detecção automática de queda e marcação de decisões</p>
+
+  <div class="err" id="errEl"></div>
+
+  <!-- ── FASE 0: Upload ── -->
+  <div id="phaseUpload">
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept="video/*" />
+      <p style="font-size:2rem;margin:0 0 .5rem">🎬</p>
+      <p>Arraste o vídeo ou clique para selecionar</p>
+      <p>MP4 · MOV · AVI · MKV</p>
+      <p class="fname" id="fname"></p>
+    </div>
+  </div>
+
+  <!-- ── FASE 1: Processando ── -->
+  <div id="phaseProcessing" style="display:none">
+    <div class="processing-card">
+      <div style="font-size:2rem">⚙️</div>
+      <h3>Analisando vídeo com IA...</h3>
+      <p id="procMessage">Carregando modelo YOLO...</p>
+      <div class="proc-track"><div class="proc-fill" id="procFill"></div></div>
+      <span class="proc-pct" id="procPct">0%</span>
+    </div>
+  </div>
+
+  <!-- ── FASE 2+3: Vídeo (lane setup + player) ── -->
+  <div id="phaseVideo" style="display:none">
+
+    <!-- instruções da fase 2 -->
+    <div class="lane-instructions" id="laneInstructions" style="display:none">
+      <div>Defina a <strong>zona de pontuação</strong>: clique no vídeo para marcar 2 linhas horizontais.</div>
+      <div id="laneHint">1º clique: faixa superior (Y1)</div>
+    </div>
+
+    <!-- container de vídeo -->
+    <div class="vid-container" id="vidContainer">
+      <video id="vid" preload="metadata"></video>
+      <canvas id="setupCanvas"></canvas>
+      <canvas id="overlayCanvas"></canvas>
+    </div>
+
+    <!-- zoom -->
+    <div class="zoom-row" id="zoomRow" style="display:none">
+      <span class="zoom-label">Zoom</span>
+      <button class="ctrl-btn" id="btnZoomOut" title="Zoom out (-)">−</button>
+      <input type="range" id="zoomSlider" min="1" max="3" step="0.1" value="1" />
+      <button class="ctrl-btn" id="btnZoomIn" title="Zoom in (+)">+</button>
+      <button class="ctrl-btn" id="btnZoomReset">100%</button>
+      <span id="zoomVal">1×</span>
+    </div>
+
+    <!-- botões da fase 2 (confirmar faixas) -->
+    <div class="lane-btn-row" id="laneBtnRow" style="display:none">
+      <button class="ctrl-btn" id="btnLaneReset">↺ Refazer</button>
+      <button class="ctrl-btn" id="btnConfirmLanes" disabled>✓ Confirmar Faixas</button>
+      <button class="ctrl-btn" id="btnSkipLanes">Pular (sem faixas)</button>
+    </div>
+
+    <!-- controles do player (fase 3) -->
+    <div id="playerControls" style="display:none">
+
+      <!-- barra de progresso -->
+      <div class="prog-track" id="progTrack">
+        <div class="prog-fill" id="progFill"></div>
+        <div class="prog-marks" id="progMarks"></div>
+      </div>
+
+      <div class="time-row">
+        <span id="timeCur">0:00</span>
+        <span id="timeDur">0:00</span>
+      </div>
+
+      <div class="controls">
+        <button class="ctrl-btn" id="btnFrameBack" title="Frame anterior (←)">◀</button>
+        <button class="ctrl-btn" id="btnPlay">▶ Play</button>
+        <button class="ctrl-btn" id="btnFrameFwd"  title="Próximo frame (→)">▶|</button>
+        <div class="ctrl-sep"></div>
+        <button class="ctrl-btn" data-rate="0.25">0.25×</button>
+        <button class="ctrl-btn" data-rate="0.5">0.5×</button>
+        <button class="ctrl-btn active" data-rate="1">1×</button>
+        <button class="ctrl-btn" data-rate="2">2×</button>
+      </div>
+
+      <div class="mark-row">
+        <button class="mark-btn valido" id="btnValido">✓ Marcar VÁLIDO</button>
+        <button class="mark-btn zero"   id="btnZero">✕ Marcar ZERO</button>
+      </div>
+
+      <div class="tl-header">Marcações</div>
+      <div class="tl-list" id="tlList">
+        <div class="tl-empty" id="tlEmpty">Nenhuma marcação ainda.</div>
+      </div>
+
+    </div><!-- /playerControls -->
+  </div><!-- /phaseVideo -->
+</div><!-- /wrap -->
+
+<!-- ── Modal de queda ── -->
+<div class="modal-overlay" id="fallModal">
+  <div class="modal-card">
+    <div class="modal-icon">⚠️</div>
+    <h3>Boi caído detectado!</h3>
+    <p id="fallModalMsg">O boi tocou a faixa ao levantar?</p>
+    <div class="modal-btns">
+      <button class="mark-btn zero"   id="btnFallYes">✕ SIM — ZERO</button>
+      <button class="mark-btn valido" id="btnFallNo">✓ NÃO — Continuar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = "http://127.0.0.1:5000";
+
+// ── state ────────────────────────────────────────────────────
+let jobId        = null;
+let fps          = 30;
+let totalFrames  = 0;
+let videoW       = 0;
+let videoH       = 0;
+let detections   = null;   // full detections.json
+let lanes        = null;   // {y1, y2} in video coords
+let marks        = [];
+let currentPhase = 0;      // 0=upload 1=processing 2=lanes 3=player
+
+// zoom/pan state
+let zoom = 1, panX = 0, panY = 0;
+let dragging = false, dragStartX = 0, dragStartY = 0, panStartX = 0, panStartY = 0;
+
+// lane setup state
+let laneClicks  = [];       // [{y_video}] — up to 2
+let lanePreview = {y1: null, y2: null};
+
+// fall handling
+let processedFalls    = new Set();  // fall frame numbers already shown in modal
+let confirmedZeroAt   = new Set();  // frame numbers where user confirmed ZERO
+let currentFallEvent  = null;
+let pollTimer         = null;
+
+// ── elements ─────────────────────────────────────────────────
+const errEl          = document.getElementById("errEl");
+const dropZone       = document.getElementById("dropZone");
+const fileInput      = document.getElementById("fileInput");
+const fnameEl        = document.getElementById("fname");
+const phaseUpload    = document.getElementById("phaseUpload");
+const phaseProcessing= document.getElementById("phaseProcessing");
+const phaseVideo     = document.getElementById("phaseVideo");
+const procMessage    = document.getElementById("procMessage");
+const procFill       = document.getElementById("procFill");
+const procPct        = document.getElementById("procPct");
+const laneInstructions=document.getElementById("laneInstructions");
+const laneHint       = document.getElementById("laneHint");
+const laneBtnRow     = document.getElementById("laneBtnRow");
+const btnConfirmLanes= document.getElementById("btnConfirmLanes");
+const vidContainer   = document.getElementById("vidContainer");
+const vid            = document.getElementById("vid");
+const setupCanvas    = document.getElementById("setupCanvas");
+const overlayCanvas  = document.getElementById("overlayCanvas");
+const zoomRow        = document.getElementById("zoomRow");
+const playerControls = document.getElementById("playerControls");
+const progTrack      = document.getElementById("progTrack");
+const progFill       = document.getElementById("progFill");
+const progMarks      = document.getElementById("progMarks");
+const timeCur        = document.getElementById("timeCur");
+const timeDur        = document.getElementById("timeDur");
+const btnPlay        = document.getElementById("btnPlay");
+const tlList         = document.getElementById("tlList");
+const tlEmpty        = document.getElementById("tlEmpty");
+const fallModal      = document.getElementById("fallModal");
+
+// ── phase transitions ─────────────────────────────────────────
+function showPhase(n) {
+  currentPhase = n;
+  phaseUpload    .style.display = (n === 0) ? "" : "none";
+  phaseProcessing.style.display = (n === 1) ? "" : "none";
+  phaseVideo     .style.display = (n >= 2)  ? "" : "none";
+  laneInstructions.style.display = (n === 2) ? "" : "none";
+  laneBtnRow      .style.display = (n === 2) ? "" : "none";
+  setupCanvas     .style.pointerEvents = (n === 2) ? "all" : "none";
+  overlayCanvas   .style.display = (n === 3) ? "" : "none";
+  zoomRow         .style.display = (n === 3) ? "" : "none";
+  playerControls  .style.display = (n === 3) ? "" : "none";
+  if (n === 2) vidContainer.classList.add("crosshair");
+  else          vidContainer.classList.remove("crosshair");
+}
+
+// ── upload / drag-drop ────────────────────────────────────────
+dropZone.addEventListener("click",     () => fileInput.click());
+dropZone.addEventListener("dragover",  e  => { e.preventDefault(); dropZone.classList.add("over"); });
+dropZone.addEventListener("dragleave", ()  => dropZone.classList.remove("over"));
+dropZone.addEventListener("drop", e => {
+  e.preventDefault(); dropZone.classList.remove("over");
+  handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener("change", () => handleFile(fileInput.files[0]));
+
+async function handleFile(file) {
+  if (!file) return;
+  fnameEl.textContent = file.name;
+  hideErr();
+
+  const form = new FormData();
+  form.append("video", file);
+
+  try {
+    const res  = await fetch(`${API}/var/upload`, { method: "POST", body: form });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Erro no upload");
+
+    jobId     = data.job_id;
+    vid.src   = `${API}${data.video_url}`;
+    showPhase(1);
+    pollStatus();
+  } catch (e) {
+    showErr(e.message);
+  }
+}
+
+// ── processing poll ───────────────────────────────────────────
+function pollStatus() {
+  pollTimer = setInterval(async () => {
+    try {
+      const res  = await fetch(`${API}/var/status/${jobId}`);
+      const data = await res.json();
+
+      procMessage.textContent = data.message || "";
+      const pct = data.progress_pct || 0;
+      procFill.style.width = `${pct}%`;
+      procPct.textContent  = `${pct}%`;
+
+      if (data.status === "completed") {
+        clearInterval(pollTimer);
+        fps         = data.fps         || 30;
+        totalFrames = data.total_frames || 0;
+        videoW      = data.video_w     || 1280;
+        videoH      = data.video_h     || 720;
+        await loadDetections();
+        startLaneSetup();
+      } else if (data.status === "error") {
+        clearInterval(pollTimer);
+        showErr("Falha no processamento: " + data.message);
+        showPhase(0);
+      }
+    } catch (e) {
+      // network blip — keep polling
+    }
+  }, 1000);
+}
+
+async function loadDetections() {
+  try {
+    const res  = await fetch(`${API}/var/detections/${jobId}`);
+    detections = await res.json();
+    fps        = detections.fps      || fps;
+    videoW     = detections.video_w  || videoW;
+    videoH     = detections.video_h  || videoH;
+  } catch (e) {
+    showErr("Não foi possível carregar as detecções.");
+  }
+}
+
+// ── lane setup (phase 2) ──────────────────────────────────────
+function startLaneSetup() {
+  laneClicks = [];
+  lanePreview = {y1: null, y2: null};
+  btnConfirmLanes.disabled = true;
+  laneHint.textContent = "1º clique: faixa superior (Y1)";
+  syncSetupCanvas();
+  showPhase(2);
+}
+
+function syncSetupCanvas() {
+  setupCanvas.width  = vidContainer.offsetWidth;
+  setupCanvas.height = vidContainer.offsetHeight;
+}
+
+setupCanvas.addEventListener("click", e => {
+  if (currentPhase !== 2) return;
+  if (laneClicks.length >= 2) return;
+
+  const rect = setupCanvas.getBoundingClientRect();
+  const y_canvas = e.clientY - rect.top;
+  const y_video  = (y_canvas / setupCanvas.height) * videoH;
+
+  laneClicks.push(y_video);
+  drawLaneSetup();
+
+  if (laneClicks.length === 1) {
+    laneHint.textContent = "2º clique: faixa inferior (Y2)";
+  } else if (laneClicks.length === 2) {
+    laneHint.textContent = "Faixas definidas. Confirme ou refaça.";
+    btnConfirmLanes.disabled = false;
+    lanePreview.y1 = Math.min(laneClicks[0], laneClicks[1]);
+    lanePreview.y2 = Math.max(laneClicks[0], laneClicks[1]);
+  }
+});
+
+function drawLaneSetup() {
+  const ctx = setupCanvas.getContext("2d");
+  ctx.clearRect(0, 0, setupCanvas.width, setupCanvas.height);
+
+  laneClicks.forEach((y_video, idx) => {
+    const y_c = (y_video / videoH) * setupCanvas.height;
+    ctx.save();
+    ctx.strokeStyle = idx === 0 ? "#3b82f6" : "#22c55e";
+    ctx.lineWidth   = 2;
+    ctx.setLineDash([8, 4]);
+    ctx.beginPath(); ctx.moveTo(0, y_c); ctx.lineTo(setupCanvas.width, y_c); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.font = "bold 13px sans-serif";
+    ctx.fillText(idx === 0 ? "Y1" : "Y2", 8, y_c - 5);
+    ctx.restore();
+  });
+
+  if (laneClicks.length === 2) {
+    const y1c = (Math.min(...laneClicks) / videoH) * setupCanvas.height;
+    const y2c = (Math.max(...laneClicks) / videoH) * setupCanvas.height;
+    const ctx2 = setupCanvas.getContext("2d");
+    ctx2.save();
+    ctx2.fillStyle = "rgba(34,197,94,0.08)";
+    ctx2.fillRect(0, y1c, setupCanvas.width, y2c - y1c);
+    ctx2.restore();
+  }
+}
+
+document.getElementById("btnLaneReset").addEventListener("click", () => {
+  laneClicks = []; lanePreview = {y1: null, y2: null};
+  btnConfirmLanes.disabled = true;
+  laneHint.textContent = "1º clique: faixa superior (Y1)";
+  setupCanvas.getContext("2d").clearRect(0, 0, setupCanvas.width, setupCanvas.height);
+});
+
+btnConfirmLanes.addEventListener("click", async () => {
+  if (lanePreview.y1 === null) return;
+  try {
+    await fetch(`${API}/var/lanes/${jobId}`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({y1: lanePreview.y1, y2: lanePreview.y2, video_h: videoH}),
+    });
+    lanes = {y1: lanePreview.y1, y2: lanePreview.y2};
+  } catch (e) { /* non-fatal */ }
+  startPlayer();
+});
+
+document.getElementById("btnSkipLanes").addEventListener("click", () => {
+  lanes = null;
+  startPlayer();
+});
+
+// ── player (phase 3) ─────────────────────────────────────────
+function startPlayer() {
+  setupCanvas.getContext("2d").clearRect(0, 0, setupCanvas.width, setupCanvas.height);
+  syncOverlayCanvas();
+  showPhase(3);
+
+  vid.addEventListener("loadedmetadata", () => {
+    timeDur.textContent = fmtTime(vid.duration);
+    renderProgMarks();
+  }, {once: true});
+
+  if (vid.readyState >= 1) timeDur.textContent = fmtTime(vid.duration);
+}
+
+function syncOverlayCanvas() {
+  overlayCanvas.width  = vidContainer.offsetWidth;
+  overlayCanvas.height = vidContainer.offsetHeight;
+}
+
+new ResizeObserver(() => {
+  if (currentPhase === 2) syncSetupCanvas();
+  if (currentPhase === 3) syncOverlayCanvas();
+}).observe(vidContainer);
+
+// ── progress bar ─────────────────────────────────────────────
+vid.addEventListener("timeupdate", () => {
+  if (!vid.duration) return;
+  const pct = (vid.currentTime / vid.duration) * 100;
+  progFill.style.width = `${pct}%`;
+  timeCur.textContent  = fmtTime(vid.currentTime);
+  drawOverlay();
+  checkFallEvents();
+});
+
+progTrack.addEventListener("click", e => {
+  if (!vid.duration) return;
+  const rect = progTrack.getBoundingClientRect();
+  vid.currentTime = ((e.clientX - rect.left) / rect.width) * vid.duration;
+});
+
+vid.addEventListener("play",  () => btnPlay.textContent = "⏸ Pause");
+vid.addEventListener("pause", () => btnPlay.textContent = "▶ Play");
+vid.addEventListener("ended", () => btnPlay.textContent = "▶ Play");
+
+// ── player controls ───────────────────────────────────────────
+btnPlay.addEventListener("click", () => vid.paused ? vid.play() : vid.pause());
+
+document.getElementById("btnFrameBack").addEventListener("click", () => {
+  vid.pause(); vid.currentTime = Math.max(0, vid.currentTime - 1 / fps);
+});
+document.getElementById("btnFrameFwd").addEventListener("click", () => {
+  vid.pause(); vid.currentTime = Math.min(vid.duration || 0, vid.currentTime + 1 / fps);
+});
+
+document.querySelectorAll("[data-rate]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    vid.playbackRate = parseFloat(btn.dataset.rate);
+    document.querySelectorAll("[data-rate]").forEach(b => b.classList.toggle("active", b.dataset.rate === btn.dataset.rate));
+  });
+});
+
+// ── keyboard shortcuts ────────────────────────────────────────
+document.addEventListener("keydown", e => {
+  if (!jobId || currentPhase < 3) return;
+  if (e.code === "Space")      { e.preventDefault(); vid.paused ? vid.play() : vid.pause(); }
+  if (e.code === "ArrowLeft")  { vid.pause(); vid.currentTime = Math.max(0, vid.currentTime - 1/fps); }
+  if (e.code === "ArrowRight") { vid.pause(); vid.currentTime = Math.min(vid.duration||0, vid.currentTime + 1/fps); }
+  if (e.key  === "+" || e.key === "=") { e.preventDefault(); setZoom(zoom + 0.25); }
+  if (e.key  === "-")                  { e.preventDefault(); setZoom(zoom - 0.25); }
+  if (e.key  === "0")                  { e.preventDefault(); setZoom(1); }
+});
+
+// ── canvas overlay ────────────────────────────────────────────
+function drawOverlay() {
+  if (!detections || currentPhase !== 3) return;
+
+  const ctx      = overlayCanvas.getContext("2d");
+  const cw       = overlayCanvas.width;
+  const ch       = overlayCanvas.height;
+  const scaleX   = cw / videoW;
+  const scaleY   = ch / videoH;
+  const frameNum = Math.round(vid.currentTime * fps);
+
+  ctx.clearRect(0, 0, cw, ch);
+
+  // Draw lane zone
+  if (lanes) {
+    const y1c = (lanes.y1 / videoH) * ch;
+    const y2c = (lanes.y2 / videoH) * ch;
+
+    ctx.save();
+    ctx.fillStyle   = "rgba(34,197,94,0.07)";
+    ctx.fillRect(0, y1c, cw, y2c - y1c);
+
+    ctx.strokeStyle = "rgba(34,197,94,0.6)";
+    ctx.lineWidth   = 1.5;
+    ctx.setLineDash([8, 4]);
+    [y1c, y2c].forEach(y => {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(cw, y); ctx.stroke();
+    });
+    ctx.setLineDash([]);
+    ctx.fillStyle = "rgba(34,197,94,0.8)";
+    ctx.font = "11px sans-serif";
+    ctx.fillText("ZONA", 6, y1c - 4);
+    ctx.restore();
+  }
+
+  const fd = detections.frames[String(frameNum)];
+  if (!fd) return;
+
+  // Horses — blue
+  (fd.horses || []).forEach(h => drawBox(ctx, h, "#3b82f6", "Cavalo", scaleX, scaleY));
+
+  // Cow — dynamic color
+  if (fd.cow) {
+    let color = "#f97316"; // orange: outside zone
+    if (confirmedZeroAt.has(frameNum)) {
+      color = "#ef4444";   // red: confirmed ZERO
+    } else if (lanes) {
+      const cy = fd.cow.cy;
+      if (cy > lanes.y1 && cy < lanes.y2) color = "#22c55e"; // green: inside
+    }
+    drawBox(ctx, fd.cow, color, "Boi", scaleX, scaleY);
+  }
+}
+
+function drawBox(ctx, box, color, label, scaleX, scaleY) {
+  const x1 = box.x1 * scaleX, y1 = box.y1 * scaleY;
+  const x2 = box.x2 * scaleX, y2 = box.y2 * scaleY;
+  const c  = 14; // corner length
+
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth   = 2.5;
+
+  // Corner brackets
+  [[x1,y1,1,1],[x2,y1,-1,1],[x1,y2,1,-1],[x2,y2,-1,-1]].forEach(([cx,cy,dx,dy]) => {
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + dx*c, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx, cy + dy*c); ctx.stroke();
+  });
+
+  // Subtle fill
+  ctx.fillStyle = color.replace(")", ",0.08)").replace("rgb(", "rgba(").replace("#", "");
+  if (color.startsWith("#")) {
+    const r = parseInt(color.slice(1,3),16), g = parseInt(color.slice(3,5),16), b = parseInt(color.slice(5,7),16);
+    ctx.fillStyle = `rgba(${r},${g},${b},0.08)`;
+  }
+  ctx.fillRect(x1, y1, x2-x1, y2-y1);
+
+  // Label
+  ctx.fillStyle = color;
+  ctx.font = "bold 12px sans-serif";
+  ctx.fillText(label, x1 + 4, y1 - 5);
+  ctx.restore();
+}
+
+// ── fall event detection ──────────────────────────────────────
+function checkFallEvents() {
+  if (!detections || !detections.fall_events || fallModal.classList.contains("show")) return;
+  const frameNum = Math.round(vid.currentTime * fps);
+
+  for (const evt of detections.fall_events) {
+    if (evt.type !== "fell") continue;
+    if (processedFalls.has(evt.frame)) continue;
+    // Trigger if within ±3 frames of fall event
+    if (Math.abs(frameNum - evt.frame) <= 3) {
+      processedFalls.add(evt.frame);
+      currentFallEvent = evt;
+      vid.pause();
+      showFallModal(evt);
+      break;
+    }
+  }
+}
+
+function showFallModal(evt) {
+  document.getElementById("fallModalMsg").textContent =
+    `Frame ${evt.frame} (${fmtTime(evt.frame / fps)}) — o boi tocou a faixa ao levantar?`;
+  fallModal.classList.add("show");
+}
+
+document.getElementById("btnFallYes").addEventListener("click", async () => {
+  fallModal.classList.remove("show");
+  if (!currentFallEvent) return;
+
+  // Mark the fall frame + nearby frames as confirmed ZERO
+  const f = currentFallEvent.frame;
+  for (let i = f - 2; i <= f + 30; i++) confirmedZeroAt.add(i);
+
+  await addMark("ZERO", f / fps);
+  currentFallEvent = null;
+  vid.play();
+});
+
+document.getElementById("btnFallNo").addEventListener("click", () => {
+  fallModal.classList.remove("show");
+  currentFallEvent = null;
+  vid.play();
+});
+
+// ── mark system ───────────────────────────────────────────────
+document.getElementById("btnValido").addEventListener("click", () => addMark("VÁLIDO"));
+document.getElementById("btnZero").addEventListener("click",   () => addMark("ZERO"));
+
+async function addMark(decision, time_s = null) {
+  if (!jobId) return;
+  vid.pause();
+  const t = time_s !== null ? time_s : vid.currentTime;
+
+  try {
+    const res  = await fetch(`${API}/var/mark`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({job_id: jobId, time_s: t, decision}),
+    });
+    const mark = await res.json();
+    if (!res.ok) throw new Error(mark.error || "Erro ao marcar");
+    marks.push(mark);
+    marks.sort((a,b) => a.time_s - b.time_s);
+    renderTimeline();
+    renderProgMarks();
+  } catch (e) {
+    showErr(e.message);
+  }
+}
+
+async function deleteMark(markId) {
+  try {
+    await fetch(`${API}/var/mark/${jobId}/${markId}`, {method: "DELETE"});
+    marks = marks.filter(m => m.id !== markId);
+    renderTimeline(); renderProgMarks();
+  } catch (e) { showErr(e.message); }
+}
+
+function replayMark(time_s) {
+  vid.currentTime  = Math.max(0, time_s - 1.5);
+  vid.playbackRate = 0.5;
+  document.querySelectorAll("[data-rate]").forEach(b => b.classList.toggle("active", b.dataset.rate === "0.5"));
+  vid.play();
+}
+
+function renderTimeline() {
+  tlList.innerHTML = "";
+  if (marks.length === 0) { tlList.appendChild(tlEmpty); return; }
+  marks.forEach(m => {
+    const cls = m.decision === "VÁLIDO" ? "valido" : "zero";
+    const div = document.createElement("div");
+    div.className = "tl-item";
+    div.innerHTML = `
+      <span class="tl-badge ${cls}">${m.decision}</span>
+      <span class="tl-time">${fmtTime(m.time_s)}</span>
+      <span class="tl-note">${m.note || ""}</span>
+      <div class="tl-actions">
+        <button class="tl-btn replay">↩ Replay</button>
+        <button class="tl-btn remove">✕</button>
+      </div>`;
+    div.querySelector(".replay").addEventListener("click", () => replayMark(m.time_s));
+    div.querySelector(".remove").addEventListener("click", () => deleteMark(m.id));
+    tlList.appendChild(div);
+  });
+}
+
+function renderProgMarks() {
+  progMarks.innerHTML = "";
+  if (!vid.duration) return;
+  marks.forEach(m => {
+    const dot = document.createElement("div");
+    dot.className = `prog-mark ${m.decision === "VÁLIDO" ? "valido" : "zero"}`;
+    dot.style.left = `${(m.time_s / vid.duration) * 100}%`;
+    dot.title = `${fmtTime(m.time_s)} — ${m.decision}`;
+    dot.addEventListener("click", e => { e.stopPropagation(); replayMark(m.time_s); });
+    progMarks.appendChild(dot);
+  });
+}
+
+vid.addEventListener("durationchange", renderProgMarks);
+
+// ── zoom + pan ────────────────────────────────────────────────
+function applyZoom() {
+  vid.style.transform = `scale(${zoom}) translate(${panX}px, ${panY}px)`;
+  if (zoom > 1) vidContainer.classList.add("grab");
+  else { vidContainer.classList.remove("grab"); panX = 0; panY = 0; }
+}
+
+function clampPan() {
+  const limit = ((zoom - 1) / zoom) * 500;
+  panX = Math.max(-limit, Math.min(limit, panX));
+  panY = Math.max(-limit, Math.min(limit, panY));
+}
+
+function setZoom(val) {
+  zoom = Math.min(3, Math.max(1, Math.round(val * 10) / 10));
+  if (zoom === 1) { panX = 0; panY = 0; } else clampPan();
+  document.getElementById("zoomSlider").value    = zoom;
+  document.getElementById("zoomVal").textContent = `${zoom.toFixed(1).replace(".0", "")}×`;
+  applyZoom();
+}
+
+document.getElementById("btnZoomIn").addEventListener("click",    () => setZoom(zoom + 0.25));
+document.getElementById("btnZoomOut").addEventListener("click",   () => setZoom(zoom - 0.25));
+document.getElementById("btnZoomReset").addEventListener("click", () => setZoom(1));
+document.getElementById("zoomSlider").addEventListener("input", e => setZoom(parseFloat(e.target.value)));
+
+vidContainer.addEventListener("mousedown", e => {
+  if (zoom <= 1 || currentPhase !== 3) return;
+  dragging = true; dragStartX = e.clientX; dragStartY = e.clientY;
+  panStartX = panX; panStartY = panY;
+  vidContainer.classList.add("grabbing"); e.preventDefault();
+});
+window.addEventListener("mousemove", e => {
+  if (!dragging) return;
+  panX = panStartX + (e.clientX - dragStartX) / zoom;
+  panY = panStartY + (e.clientY - dragStartY) / zoom;
+  clampPan(); applyZoom();
+});
+window.addEventListener("mouseup", () => {
+  if (!dragging) return;
+  dragging = false; vidContainer.classList.remove("grabbing");
+});
+
+// ── utils ─────────────────────────────────────────────────────
+function fmtTime(s) {
+  if (!s || isNaN(s)) return "0:00";
+  const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+  return `${m}:${sec.toString().padStart(2, "0")}`;
+}
+function showErr(msg) { errEl.textContent = `❌ ${msg}`; errEl.style.display = "block"; }
+function hideErr()    { errEl.style.display = "none"; }
+</script>
+</body>
+</html>
