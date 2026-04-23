@@ -181,31 +181,31 @@ document.addEventListener("DOMContentLoaded", () => {
     // Botões de download após conclusão
     const dlBtns = (isComplete && item.downloadLinks) ? `
       <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;">
-        <a href="http://127.0.0.1:5000${item.downloadLinks.report_pdf}" target="_blank"
+        <a href="https://puxa-ai-backend.onrender.com${item.downloadLinks.report_pdf}" target="_blank"
            style="background:#27ae60;color:#fff;padding:5px 11px;border-radius:5px;
                   text-decoration:none;font-size:.72rem;font-weight:700;
                   display:inline-flex;align-items:center;gap:5px;white-space:nowrap;">
           <i class="fas fa-file-pdf"></i> PDF
         </a>
-        <a href="http://127.0.0.1:5000${item.downloadLinks.video}" target="_blank"
+        <a href="https://puxa-ai-backend.onrender.com${item.downloadLinks.video}" target="_blank"
            style="background:#27ae60;color:#fff;padding:5px 11px;border-radius:5px;
                   text-decoration:none;font-size:.72rem;font-weight:700;
                   display:inline-flex;align-items:center;gap:5px;white-space:nowrap;">
           <i class="fas fa-video"></i> VÍDEO
         </a>
-        <a href="http://127.0.0.1:5000${item.downloadLinks.graph_png}" target="_blank"
+        <a href="https://puxa-ai-backend.onrender.com${item.downloadLinks.graph_png}" target="_blank"
            style="background:#27ae60;color:#fff;padding:5px 11px;border-radius:5px;
                   text-decoration:none;font-size:.72rem;font-weight:700;
                   display:inline-flex;align-items:center;gap:5px;white-space:nowrap;">
           <i class="fas fa-image"></i> GRÁFICO
         </a>
-        <a href="http://127.0.0.1:5000${item.downloadLinks.metrics_csv}" target="_blank"
+        <a href="https://puxa-ai-backend.onrender.com${item.downloadLinks.metrics_csv}" target="_blank"
            style="background:#27ae60;color:#fff;padding:5px 11px;border-radius:5px;
                   text-decoration:none;font-size:.72rem;font-weight:700;
                   display:inline-flex;align-items:center;gap:5px;white-space:nowrap;">
           <i class="fas fa-table"></i> MÉTRICAS
         </a>
-        <a href="http://127.0.0.1:5000${item.downloadLinks.summary_csv}" target="_blank"
+        <a href="https://puxa-ai-backend.onrender.com${item.downloadLinks.summary_csv}" target="_blank"
            style="background:#27ae60;color:#fff;padding:5px 11px;border-radius:5px;
                   text-decoration:none;font-size:.72rem;font-weight:700;
                   display:inline-flex;align-items:center;gap:5px;white-space:nowrap;">
@@ -331,7 +331,7 @@ document.addEventListener("DOMContentLoaded", () => {
       formData.append("mode", mode);
 
       const xhr = new XMLHttpRequest();
-      xhr.open("POST", "http://127.0.0.1:5000/upload", true);
+      xhr.open("POST", "https://puxa-ai-backend.onrender.com/upload", true);
 
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
@@ -435,7 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const checkInterval = setInterval(async () => {
       try {
-        const res = await fetch(`http://127.0.0.1:5000/status/${jobId}`);
+        const res = await fetch(`https://puxa-ai-backend.onrender.com/status/${jobId}`);
         if (!res.ok) return;
         const data = await res.json();
 
