@@ -378,7 +378,7 @@ async function handleFile(file) {
   form.append("video", file);
 
   try {
-    const res  = await fetch(`${API}/var/upload`, { method: "POST", body: form });
+    const res  = await fetch(`${API}/upload`, { method: "POST", body: form });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro no upload");
 
@@ -395,7 +395,7 @@ async function handleFile(file) {
 function pollStatus() {
   pollTimer = setInterval(async () => {
     try {
-      const res  = await fetch(`${API}/var/status/${jobId}`);
+      const res  = await fetch(`${API}/status/${jobId}`);
       const data = await res.json();
 
       procMessage.textContent = data.message || "";
