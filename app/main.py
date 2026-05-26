@@ -312,7 +312,9 @@ def process_video(video_path: str, job_id: str, base_output: str = "output", sta
         total_time = max(0.001, tempo)
 
     avg_speed_kmh = (float(spd.total_distance) / float(total_time)) * 3.6
-    efficiency_percent = (avg_speed_kmh / float(spd.max_speed)) * 100.0 if float(spd.max_speed) > 0 else 0.0
+    # Garante que max_speed >= avg_speed (EMA pode subestimar picos)
+    max_speed_final = max(float(spd.max_speed), avg_speed_kmh)
+    efficiency_percent = (avg_speed_kmh / max_speed_final) * 100.0 if max_speed_final > 0 else 0.0
 
     # ✅ IMPULSÃO (robusta): percentil 95 das acelerações positivas (m/s²)
     impulse_m_s2 = 0.0
@@ -337,7 +339,7 @@ def process_video(video_path: str, job_id: str, base_output: str = "output", sta
             "locked_track_id",
         ])
         w.writerow([
-            round(float(spd.max_speed), 3),
+            round(max_speed_final, 3),
             round(float(avg_speed_kmh), 3),
             round(float(spd.max_accel), 3),
             round(float(impulse_m_s2), 3),
@@ -353,7 +355,7 @@ def process_video(video_path: str, job_id: str, base_output: str = "output", sta
     return {
         "video_width": width,
         "video_height": height,
-        "max_speed": round(float(spd.max_speed), 2),
+        "max_speed": round(max_speed_final, 2),
         "max_accel": round(float(spd.max_accel), 2),
         "impulse_m_s2": round(float(impulse_m_s2), 2),
         "avg_speed": round(float(avg_speed_kmh), 2),
