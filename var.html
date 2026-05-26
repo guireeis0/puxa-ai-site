@@ -475,7 +475,9 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
 /* VAR v3 — multi-object tracking fallback */
-const API = "https://guireeis0-puxa-ai-var.hf.space";
+const API = window.location.hostname === "localhost"
+  ? "http://localhost:5000"
+  : "https://guireeis0-puxa-ai-var.hf.space";
 
 let jobId           = null;
 let pollTimer       = null;

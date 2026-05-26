@@ -5,7 +5,9 @@
 document.addEventListener("DOMContentLoaded", () => {
 
   // === CONFIG ===
-  const API_BASE = "https://guireeis0-puxa-ai-var.hf.space";
+  const API_BASE = window.location.hostname === "localhost"
+    ? "http://localhost:5000"
+    : "https://guireeis0-puxa-ai-var.hf.space";
 
   // === DOM ===
   const dropZone       = document.getElementById("dropZone");
