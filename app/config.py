@@ -12,7 +12,7 @@ SMOOTHING            = 0.96   # fator EMA global do SpeedTracker
 # ── Detecção e tracking ──────────────────────────────────────────────────────
 REACQUIRE_MAX_DIST_PX = 140.0  # distância máxima (px) para reidentificar o cavalo
 MIN_BOX_AREA          = 800    # área mínima (px²) para considerar uma detecção válida
-HORSE_LENGTH_METERS   = 1.9    # comprimento médio do cavalo (m) — base da régua de escala
+HORSE_LENGTH_METERS   = 2.4    # comprimento médio do cavalo (m) — base da régua de escala
 
 # ── Escala pixel → metro ─────────────────────────────────────────────────────
 SCALE_EMA_ALPHA      = 0.10   # suavização da régua de escala
