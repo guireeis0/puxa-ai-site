@@ -27,7 +27,23 @@ MIN_RUN_SECONDS        = 3.0  # duração mínima válida de corrida
 MIN_RUN_DISTANCE_M     = 15.0 # distância mínima válida de corrida (m)
 MOVEMENT_MIN_SPEED_KMH = 8.0  # velocidade mínima para confirmar movimento real
 MOVEMENT_HOLD_FRAMES   = 10   # frames confirmando movimento antes de acumular distância
-PISTA_LIMIT_M          = 120.0 # distância máxima da pista (m)
+# ── Dimensões oficiais da pista (padrão ABVAQ) ───────────────────────────────
+PISTA_LIMIT_M          = 160.0 # comprimento total da pista (m)
+BRETE_LARGURA_MIN_M    = 15.0  # largura mínima do brete/saída (m)
+BRETE_LARGURA_MAX_M    = 20.0  # largura máxima do brete/saída (m)
+TOLERANCIA_END_M       = 10.0  # fim da faixa de tolerância — ajuste inicial (m)
+CORRIDA_START_M        = 10.0  # início da zona de corrida/ajuste do boi (m)
+CORRIDA_END_M          = 100.0 # fim da zona de corrida/ajuste do boi (m)
+DERRUBADA_START_M      = 100.0 # início da faixa de pontuação (m)
+DERRUBADA_END_M        = 110.0 # fim da faixa de pontuação — boi deve cair aqui (m)
+DERRUBADA_LARGURA_M    = 10.0  # largura da faixa de pontuação (m)
+DESACEL_START_M        = 110.0 # início da área de desaceleração (m)
+DESACEL_END_M          = 160.0 # fim da área de desaceleração (m)
+PISTA_LARGURA_M        = 25.0  # largura da pista na faixa de pontuação (m)
+CORREDOR_LATERAL_M     = 2.0   # largura de cada corredor lateral (m)
+PISTA_LARGURA_TOTAL_M  = 29.0  # largura total com corredores (25 + 2 + 2) (m)
+PISTA_LARGURA_FINAL_M  = 45.0  # largura máxima na área de desaceleração (m)
+AREIA_PROFUNDIDADE_M   = 0.40  # profundidade mínima da areia (m)
 
 # ── Lock em um único animal ──────────────────────────────────────────────────
 LOCK_ID                    = True  # trava o tracking no primeiro animal detectado
