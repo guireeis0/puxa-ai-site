@@ -12,6 +12,7 @@ if BASE_DIR not in sys.path:
 
 from flask import Blueprint, request, jsonify, send_file
 from werkzeug.utils import secure_filename
+from config import DERRUBADA_START_M, DERRUBADA_END_M, PISTA_LIMIT_M
 
 var_bp = Blueprint("var", __name__)
 
@@ -573,13 +574,23 @@ def _process_video_yolo(job_id, video_path, output_root, model_path):
 
         fall_result = None
         if main_fall:
+            fall_ts = round(main_fall["frame"] / fps, 2)
+            fall_dist_est = round((main_fall["frame"] / max(total_frames, 1)) * PISTA_LIMIT_M, 1)
+            na_faixa = (
+                fall_dist_est is not None
+                and DERRUBADA_START_M <= fall_dist_est <= DERRUBADA_END_M
+            )
             fall_result = {
-                "detected":    True,
-                "frame":       main_fall["frame"],
-                "timestamp_s": round(main_fall["frame"] / fps, 2),
-                "delta_cy":    fall_delta_cy,
-                "confidence":  fall_conf,
-                "evidence_b64": evidence_b64,
+                "detected":       True,
+                "frame":          main_fall["frame"],
+                "timestamp_s":    fall_ts,
+                "delta_cy":       fall_delta_cy,
+                "confidence":     fall_conf,
+                "evidence_b64":   evidence_b64,
+                "dist_estimada_m": fall_dist_est,
+                "na_faixa":       na_faixa,
+                "faixa_inicio_m": DERRUBADA_START_M,
+                "faixa_fim_m":    DERRUBADA_END_M,
             }
 
         JOBS[job_id] = {

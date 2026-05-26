@@ -14,7 +14,19 @@ from config import (
     MIN_RUN_DISTANCE_M, MOVEMENT_MIN_SPEED_KMH, MOVEMENT_HOLD_FRAMES,
     PISTA_LIMIT_M, LOCK_ID, UNLOCK_AFTER_LOST_SECONDS,
     HUD_BOX_EMA_ALPHA, HUD_VALUE_EMA_ALPHA, HUD_UPDATE_EVERY_N_FRAMES,
+    TOLERANCIA_END_M, CORRIDA_END_M, DERRUBADA_START_M, DERRUBADA_END_M,
 )
+
+
+def _get_zone(dist_m: float) -> str:
+    if dist_m < TOLERANCIA_END_M:
+        return "tolerancia"
+    elif dist_m < DERRUBADA_START_M:
+        return "corrida"
+    elif dist_m < DERRUBADA_END_M:
+        return "derrubada"
+    else:
+        return "desaceleracao"
 
 
 def euclid(p1, p2):
@@ -79,8 +91,9 @@ def process_video(video_path: str, job_id: str, base_output: str = "output", sta
 
     csv_file = open(output_csv, "w", newline="", encoding="utf-8")
     csv_writer = csv.writer(csv_file)
-    csv_writer.writerow(["frame", "tempo_s", "speed_kmh", "accel_m_s2", "time_to_max_speed_s", "status", "track_id", "cx", "cy"])
+    csv_writer.writerow(["frame", "tempo_s", "speed_kmh", "accel_m_s2", "time_to_max_speed_s", "status", "track_id", "cx", "cy", "zona", "distancia_m"])
 
+    zone_speeds = {"tolerancia": [], "corrida": [], "derrubada": [], "desaceleracao": []}
     last_center = None
     pixel_to_meter = None
     spd = SpeedTracker(MAX_REAL_SPEED_KMH, SMOOTHING)
@@ -272,6 +285,10 @@ def process_video(video_path: str, job_id: str, base_output: str = "output", sta
         ending_now = (min_ok and (lost_counter >= lost_end_frames))
         
         # Gravação das métricas reais no CSV (para os gráficos do relatório)
+        zona = _get_zone(spd.total_distance)
+        if status == "ok" and float(speed_kmh) > 0:
+            zone_speeds[zona].append(float(speed_kmh))
+
         csv_writer.writerow([
             frame_id,
             f"{tempo:.3f}",
@@ -282,6 +299,8 @@ def process_video(video_path: str, job_id: str, base_output: str = "output", sta
             str(cur_track_id) or "",
             f"{cur_pos[0]:.1f}" if cur_pos else "",
             f"{cur_pos[1]:.1f}" if cur_pos else "",
+            zona,
+            f"{spd.total_distance:.2f}",
         ])
 
         # Desenho no Frame
@@ -352,6 +371,11 @@ def process_video(video_path: str, job_id: str, base_output: str = "output", sta
             str(locked_track_id) if locked_track_id is not None else "",
         ])
 
+    zone_avg = {
+        z: round(sum(v) / len(v), 2) if v else None
+        for z, v in zone_speeds.items()
+    }
+
     return {
         "video_width": width,
         "video_height": height,
@@ -367,4 +391,10 @@ def process_video(video_path: str, job_id: str, base_output: str = "output", sta
         "run_time_s": round(float(total_time), 3),
         "locked_track_id": locked_track_id,
         "output_dir": out_dir,
+        "zonas": {
+            "tolerancia":    {"avg_speed_kmh": zone_avg["tolerancia"],    "distancia_m": TOLERANCIA_END_M},
+            "corrida":       {"avg_speed_kmh": zone_avg["corrida"],       "distancia_m": CORRIDA_END_M - TOLERANCIA_END_M},
+            "derrubada":     {"avg_speed_kmh": zone_avg["derrubada"],     "distancia_m": DERRUBADA_END_M - DERRUBADA_START_M},
+            "desaceleracao": {"avg_speed_kmh": zone_avg["desaceleracao"], "distancia_m": PISTA_LIMIT_M - DERRUBADA_END_M},
+        },
     }
