@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload Designer — Puxa.ai</title>
+  <title>Análise Biomecânica — Puxa.ai</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -20,109 +20,194 @@
     </div>
   </nav>
 
-  <!-- ========== MAIN CONTAINER ========== -->
-  <main class="main-container" id="secao-upload">
+  <!-- ========== STAGE CONTAINER ========== -->
+  <main class="stage-container">
 
-    <!-- Left Panel: Upload Area -->
-    <section class="upload-panel">
-      <div class="panel-header">
-        <h2><i class="fas fa-upload"></i> Enviar Arquivos</h2>
-        <p>Arraste e solte ou clique para selecionar</p>
+    <!-- ── STAGE 1: UPLOAD ── -->
+    <section id="stageUpload" class="stage active">
+      <div class="upload-hero">
+        <div class="upload-hero-label">
+          <i class="fas fa-dna"></i>
+          <span>ANÁLISE BIOMECÂNICA</span>
+        </div>
+        <h1 class="upload-hero-title">Envie o vídeo do animal</h1>
+        <p class="upload-hero-sub">A IA extrai métricas de velocidade, aceleração e biomecânica automaticamente</p>
       </div>
 
-      <!-- Drop Zone -->
       <div class="drop-zone" id="dropZone">
         <div class="drop-zone-content">
           <div class="drop-icon">
             <i class="fas fa-cloud-upload-alt"></i>
           </div>
-          <h3>Arraste seus arquivos aqui</h3>
+          <h3>Arraste seu vídeo aqui</h3>
           <p>ou clique para selecionar do computador</p>
           <div class="drop-formats">
             <span class="format-tag"><i class="fas fa-video"></i> MP4</span>
-            <span class="format-tag"><i class="fas fa-image"></i> JPG/PNG</span>
-            <span class="format-tag"><i class="fas fa-file-pdf"></i> PDF</span>
-            <span class="format-tag"><i class="fas fa-file-csv"></i> CSV</span>
-            <span class="format-tag"><i class="fas fa-file-alt"></i> DOC</span>
+            <span class="format-tag"><i class="fas fa-video"></i> MOV</span>
+            <span class="format-tag"><i class="fas fa-video"></i> AVI</span>
+            <span class="format-tag"><i class="fas fa-video"></i> MKV</span>
           </div>
           <button class="btn-select" id="btnSelect">
-            <i class="fas fa-folder-open"></i> Selecionar Arquivos
+            <i class="fas fa-folder-open"></i> Selecionar Vídeo
           </button>
         </div>
         <div class="drop-zone-active">
           <i class="fas fa-bullseye"></i>
           <span>Solte aqui!</span>
         </div>
-        <input type="file" id="fileInput" multiple hidden>
-      </div>
-
-      <!-- Upload Options -->
-      <div class="upload-options">
-        <div class="option-group">
-          <label class="option-label">
-            <i class="fas fa-tag"></i> Categoria
-          </label>
-          <select class="option-select" id="categorySelect">
-            <option value="prova">Vídeo de Prova</option>
-            <option value="metricas">Dados de Métricas</option>
-            <option value="perfil">Foto de Perfil</option>
-            <option value="documento">Documento</option>
-            <option value="outro">Outro</option>
-          </select>
-        </div>
-        <div class="option-group">
-          <label class="option-label">
-            <i class="fas fa-calendar"></i> Evento
-          </label>
-          <input type="text" class="option-input" placeholder="Ex: Arena Norte 2026" id="eventInput">
-        </div>
-        <div class="option-group">
-          <label class="option-label">
-            <i class="fas fa-sticky-note"></i> Observações
-          </label>
-          <textarea class="option-textarea" placeholder="Notas sobre o upload..." id="notesInput" rows="2"></textarea>
-        </div>
+        <input type="file" id="fileInput" accept="video/*,.mp4,.mov,.avi,.mkv" hidden>
       </div>
     </section>
 
-    <!-- Right Panel: File Queue & Progress -->
-    <section class="queue-panel">
-      <div class="panel-header">
-        <h2><i class="fas fa-list-ul"></i> Fila de Uploads</h2>
-        <div class="queue-stats">
-          <span class="stat" id="totalFiles">0 arquivos</span>
-          <span class="stat-divider">|</span>
-          <span class="stat" id="totalSize">0 MB</span>
-        </div>
-      </div>
+    <!-- ── STAGE 2: PROCESSAMENTO ── -->
+    <section id="stageProcessing" class="stage">
+      <div class="proc-card">
 
-      <!-- Queue List -->
-      <div class="queue-list" id="queueList">
-        <div class="queue-empty" id="queueEmpty">
-          <i class="fas fa-inbox"></i>
-          <p>Nenhum arquivo na fila</p>
-          <span>Adicione arquivos usando o painel ao lado</span>
-        </div>
-      </div>
-
-      <!-- Upload Actions -->
-      <div class="upload-actions" id="uploadActions" style="display: none;">
-        <div class="progress-global">
-          <div class="progress-info">
-            <span id="progressText">0% concluído</span>
-            <span id="progressSpeed">0 MB/s</span>
+        <div class="proc-header">
+          <div class="file-icon video" id="procIcon">
+            <i class="fas fa-video"></i>
           </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar-fill" id="progressBar"></div>
+          <div class="proc-header-info">
+            <div class="proc-filename" id="procFilename">carregando...</div>
+            <div class="proc-filemeta">
+              <span id="procFilesize">—</span>
+              <span class="file-type">MP4</span>
+            </div>
           </div>
         </div>
-        <div class="action-buttons">
-          <button class="btn-clear" id="btnClear">
-            <i class="fas fa-trash-alt"></i> Limpar Fila
+
+        <div style="margin-top:14px;display:flex;align-items:center;gap:8px;">
+          <div style="display:flex;gap:3px;align-items:center;">
+            <span class="puxa-dot" style="background:#E8722A;"></span>
+            <span class="puxa-dot" style="background:#E8722A;"></span>
+            <span class="puxa-dot" style="background:#E8722A;"></span>
+            <span class="puxa-dot" style="background:#E8722A;"></span>
+            <span class="puxa-dot" style="background:#E8722A;"></span>
+          </div>
+          <span class="ia-message" id="procMessage" style="
+            font-family:'Space Mono',monospace;font-size:10px;
+            font-weight:700;text-transform:uppercase;
+            letter-spacing:.6px;color:#E8722A;">
+            IA: Iniciando...
+          </span>
+        </div>
+
+        <div data-ia-frames style="display:flex;gap:4px;margin-top:12px;">
+          <div data-frame="0" class="proc-frame"><div class="puxa-scan-bar"></div></div>
+          <div data-frame="1" class="proc-frame"><div class="puxa-scan-bar"></div></div>
+          <div data-frame="2" class="proc-frame"><div class="puxa-scan-bar"></div></div>
+          <div data-frame="3" class="proc-frame"><div class="puxa-scan-bar"></div></div>
+          <div data-frame="4" class="proc-frame"><div class="puxa-scan-bar"></div></div>
+          <div data-frame="5" class="proc-frame"><div class="puxa-scan-bar"></div></div>
+          <div data-frame="6" class="proc-frame"><div class="puxa-scan-bar"></div></div>
+          <div data-frame="7" class="proc-frame"><div class="puxa-scan-bar"></div></div>
+        </div>
+
+        <div style="margin-top:10px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+            <span id="procPct" style="font-family:'Space Mono',monospace;font-size:10px;color:#E8722A;">0%</span>
+          </div>
+          <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;">
+            <div id="procBar" style="height:100%;width:0%;border-radius:99px;
+                 background:linear-gradient(90deg,#E8722A,#2E5BBA);transition:width .35s ease;"></div>
+          </div>
+        </div>
+
+        <div id="procLog" style="
+             margin-top:12px;
+             background:rgba(255,255,255,0.02);
+             border:1px solid rgba(255,255,255,0.07);
+             border-radius:8px;padding:8px 12px;
+             min-height:54px;display:flex;flex-direction:column;
+             gap:3px;overflow:hidden;">
+          <span style="font-family:'Space Mono',monospace;font-size:10px;
+                color:#4B5563;font-style:italic;">Aguardando servidor...</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── STAGE 3: DASHBOARD ── -->
+    <section id="stageDashboard" class="stage">
+      <div class="dashboard-inline">
+
+        <div class="dashboard-header">
+          <div class="dashboard-title">
+            <i class="fas fa-chart-line"></i>
+            <div>
+              <span class="dashboard-label">RELATÓRIO BIOMECÂNICO</span>
+              <h2 class="dashboard-filename" id="dashFilename">—</h2>
+            </div>
+          </div>
+          <button class="btn-new-analysis" id="btnNewAnalysis">
+            <i class="fas fa-redo"></i> Nova Análise
           </button>
-          <button type="button" class="btn-upload" id="btnUpload">
-              <i class="fas fa-rocket"></i> Enviar Todos
-          </button>
+        </div>
+
+        <div class="dashboard-body">
+
+          <div class="dash-metrics">
+            <div class="dash-metric-card">
+              <span class="dash-metric-icon"><i class="fas fa-bolt"></i></span>
+              <span class="dash-metric-value" id="dashMaxSpeed">—</span>
+              <span class="dash-metric-label">Vel. Máxima</span>
+              <span class="dash-metric-unit">km/h</span>
+            </div>
+            <div class="dash-metric-card">
+              <span class="dash-metric-icon"><i class="fas fa-tachometer-alt"></i></span>
+              <span class="dash-metric-value" id="dashAvgSpeed">—</span>
+              <span class="dash-metric-label">Vel. Média</span>
+              <span class="dash-metric-unit">km/h</span>
+            </div>
+            <div class="dash-metric-card">
+              <span class="dash-metric-icon"><i class="fas fa-road"></i></span>
+              <span class="dash-metric-value" id="dashDistance">—</span>
+              <span class="dash-metric-label">Distância</span>
+              <span class="dash-metric-unit">metros</span>
+            </div>
+            <div class="dash-metric-card">
+              <span class="dash-metric-icon"><i class="fas fa-stopwatch"></i></span>
+              <span class="dash-metric-value" id="dashRunTime">—</span>
+              <span class="dash-metric-label">Tempo de Prova</span>
+              <span class="dash-metric-unit">segundos</span>
+            </div>
+            <div class="dash-metric-card">
+              <span class="dash-metric-icon"><i class="fas fa-rocket"></i></span>
+              <span class="dash-metric-value" id="dashMaxAccel">—</span>
+              <span class="dash-metric-label">Arrancada</span>
+              <span class="dash-metric-unit">m/s²</span>
+            </div>
+            <div class="dash-metric-card">
+              <span class="dash-metric-icon"><i class="fas fa-percentage"></i></span>
+              <span class="dash-metric-value" id="dashEfficiency">—</span>
+              <span class="dash-metric-label">Eficiência</span>
+              <span class="dash-metric-unit">%</span>
+            </div>
+          </div>
+
+          <div class="dash-charts">
+            <div class="dash-chart-card">
+              <div class="dash-chart-title"><i class="fas fa-wave-square"></i> Velocidade ao longo do tempo</div>
+              <canvas id="chartSpeed"></canvas>
+            </div>
+            <div class="dash-chart-card">
+              <div class="dash-chart-title"><i class="fas fa-arrows-alt-v"></i> Aceleração ao longo do tempo</div>
+              <canvas id="chartAccel"></canvas>
+            </div>
+          </div>
+
+
+          <div class="dash-bottom">
+            <div class="dash-analysis">
+              <div class="dash-section-title"><i class="fas fa-brain"></i> Análise da IA</div>
+              <p id="dashAiAnalysis">—</p>
+            </div>
+            <div class="dash-downloads">
+              <div class="dash-section-title"><i class="fas fa-download"></i> Downloads</div>
+              <div class="dash-dl-btns" id="dashDlBtns"></div>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>
@@ -131,6 +216,8 @@
 
   <!-- ========== TOAST CONTAINER ========== -->
   <div class="toast-container" id="toastContainer"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
   <script type="module" src="puxa-ai-site/script.js"></script>
 </body>
 </html>

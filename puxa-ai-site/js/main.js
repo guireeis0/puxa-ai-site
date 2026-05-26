@@ -114,17 +114,6 @@ document.addEventListener('DOMContentLoaded', () => {
     heroVideo.play && heroVideo.play().catch(() => {});
   }
 
-  // === PARALLAX EFFECT ON HERO ===
-  const heroContent = document.querySelector('.hero-content');
-  if (heroContent) {
-    window.addEventListener('scroll', () => {
-      const scrolled = window.scrollY;
-      if (scrolled < window.innerHeight) {
-        heroContent.style.transform = `translateY(${scrolled * 0.3}px)`;
-        heroContent.style.opacity = 1 - (scrolled / window.innerHeight) * 0.8;
-      }
-    });
-  }
 
   // === ODDS TABLE ANIMATION ===
   const oddsValues = document.querySelectorAll('.odds-value');

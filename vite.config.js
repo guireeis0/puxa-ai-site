@@ -5,6 +5,16 @@ import { fileURLToPath } from 'url'
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 
 export default defineConfig({
+  server: {
+    port: 5174,
+    proxy: {
+      '/upload':   'http://localhost:5000',
+      '/status':   'http://localhost:5000',
+      '/download': 'http://localhost:5000',
+      '/health':   'http://localhost:5000',
+      '/var':      'http://localhost:5000',
+    },
+  },
   build: {
     rollupOptions: {
       input: {

@@ -22,3 +22,16 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Variáveis de ambiente (nunca commitar)
+.env
+
+# Dados de usuários (vídeos e resultados processados)
+uploads/
+output/

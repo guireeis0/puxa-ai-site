@@ -1,19 +1,31 @@
 import os
 import sys
 import uuid
+import logging
 import threading
 import requests
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, send_from_directory
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from analytics import generate_report
 from report import generate_pdf_report
 from var import var_bp
+from main import process_video as process_performance
+from config import ALLOWED_EXTENSIONS, MAX_UPLOAD_BYTES
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -35,12 +47,35 @@ PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, ".."))
 
 UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, "uploads")
 OUTPUT_FOLDER = os.path.join(PROJECT_ROOT, "output")
+DIST_FOLDER   = os.path.join(PROJECT_ROOT, "dist")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
-ALLOWED_EXTENSIONS = {'mp4', 'mov', 'avi', 'mkv'}
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024 
+app.config['MAX_CONTENT_LENGTH'] = MAX_UPLOAD_BYTES
+
+# ── Servir o frontend (build do Vite) ──────────────────────────
+@app.route("/")
+def serve_index():
+    return send_from_directory(DIST_FOLDER, "index.html")
+
+@app.route("/var.html")
+@app.route("/var-page")
+def serve_var():
+    return send_from_directory(DIST_FOLDER, "var.html")
+
+@app.route("/analisar.html")
+@app.route("/analisar")
+def serve_analisar():
+    return send_from_directory(DIST_FOLDER, "analisar.html")
+
+@app.route("/assets/<path:filename>")
+def serve_assets(filename):
+    return send_from_directory(os.path.join(DIST_FOLDER, "assets"), filename)
+
+@app.route("/puxa-ai-site/<path:filename>")
+def serve_puxa_static(filename):
+    return send_from_directory(os.path.join(DIST_FOLDER, "puxa-ai-site"), filename)
 
 JOBS_STATUS = {} 
 
@@ -57,8 +92,8 @@ def generate_ai_analysis(result: dict) -> str:
     """
     parts = []
 
-    speed     = result.get("avg_speed_kmh") or result.get("velocidade_media")
-    max_speed = result.get("max_speed_kmh")  or result.get("velocidade_maxima")
+    speed     = result.get("avg_speed") or result.get("velocidade_media")
+    max_speed = result.get("max_speed") or result.get("velocidade_maxima")
     sym       = result.get("simetria")        or result.get("symmetry_score")
     cadence   = result.get("cadencia")        or result.get("cadence")
     stride    = result.get("comprimento_passo") or result.get("stride_length")
@@ -99,7 +134,7 @@ def run_ai_pipeline(job_id, video_path, mode="performance"):
     def update_msg(msg):
         if job_id in JOBS_STATUS:
             JOBS_STATUS[job_id]["message"] = msg
-            print(f"[{job_id}] {msg}")
+            logging.info("[%s] %s", job_id, msg)
 
     JOBS_STATUS[job_id] = {
         "status": "processing", 
@@ -108,8 +143,6 @@ def run_ai_pipeline(job_id, video_path, mode="performance"):
     }
     
     try:
-        from main import process_video as process_performance
-        
         # 1) IA processa o vídeo (YOLO + SpeedTracker)
         result = process_performance(
             video_path, 
@@ -137,7 +170,7 @@ def run_ai_pipeline(job_id, video_path, mode="performance"):
             "status": "completed",
             "message": "IA: Análise concluída! Relatório pronto.",
             "mode": mode,
-            "result": result,           # ← métricas + ai_analysis enviados ao frontend
+            "result": result,
             "downloads": {
                 "video":       f"/download/{job_id}/resultado.mp4",
                 "report_pdf":  f"/download/{job_id}/performance_report.pdf",
@@ -146,10 +179,10 @@ def run_ai_pipeline(job_id, video_path, mode="performance"):
                 "summary_csv": f"/download/{job_id}/summary.csv"
             }
         }
-        print(f"Job {job_id} finalizado com sucesso!")
+        logging.info("Job %s finalizado com sucesso.", job_id)
 
     except Exception as e:
-        print(f"❌ [ERRO] Falha no Job {job_id}: {str(e)}")
+        logging.error("Falha no Job %s: %s", job_id, e, exc_info=True)
         JOBS_STATUS[job_id] = {
             "status": "error", 
             "message": f"Erro na análise: {str(e)}"
@@ -158,6 +191,10 @@ def run_ai_pipeline(job_id, video_path, mode="performance"):
 # ============================================================
 # 🚀 API REST (CONEXÃO COM O FRONTEND)
 # ============================================================
+@app.route("/health", methods=["GET"])
+def health_check():
+    return jsonify({"status": "ok"}), 200
+
 @app.route("/upload", methods=["POST"])
 def upload_video():
     mode = request.form.get('mode', 'performance')

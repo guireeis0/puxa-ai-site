@@ -5,51 +5,16 @@ from ultralytics import YOLO
 
 from hud import draw_corner_box, draw_hud
 from speed import SpeedTracker
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-MODEL_PATH = os.path.abspath(os.path.join(BASE_DIR, "..", "models", "yolov8n.pt"))
-
-MODEL_PATH = "models/yolov8n.pt"
-
-MAX_REAL_SPEED_KMH = 58.0
-SMOOTHING = 0.96
-
-REACQUIRE_MAX_DIST_PX = 140.0
-MIN_BOX_AREA = 800
-HORSE_LENGTH_METERS = 1.9
-SCALE_PERSPECTIVE_BIAS = 0.3
-SCALE_EMA_ALPHA = 0.15
-
-# ==========================
-# START / END mais robusto
-# ==========================
-START_OK_HOLD_FRAMES = 5
-LOST_END_SECONDS = 3.0
-MIN_RUN_SECONDS = 3.0
-MIN_RUN_DISTANCE_M = 15.0
-MOVEMENT_MIN_SPEED_KMH = 8.0
-MOVEMENT_HOLD_FRAMES = 10
-
-# ==========================
-# ✅ LOCK EM 1 CAVALO (TRACK ID)
-# ==========================
-LOCK_ID = True
-UNLOCK_AFTER_LOST_SECONDS = 2.0
-
-# ==========================
-# ✅ ESTABILIZAÇÃO DO HUD
-# ==========================
-HUD_BOX_EMA_ALPHA = 0.25
-HUD_VALUE_EMA_ALPHA = 0.25
-HUD_UPDATE_EVERY_N_FRAMES = 2
-
-# ==========================
-# ✅ ESTABILIZAÇÃO DA ESCALA (pixel -> metro)
-# ==========================
-SCALE_EMA_ALPHA = 0.10
-SCALE_MIN = 0.001
-SCALE_MAX = 0.020
-SCALE_JUMP_MAX_RATIO = 1.25
+from config import (
+    MODEL_PATH,
+    MAX_REAL_SPEED_KMH, SMOOTHING,
+    REACQUIRE_MAX_DIST_PX, MIN_BOX_AREA, HORSE_LENGTH_METERS,
+    SCALE_EMA_ALPHA, SCALE_MIN, SCALE_MAX, SCALE_JUMP_MAX_RATIO,
+    START_OK_HOLD_FRAMES, LOST_END_SECONDS, MIN_RUN_SECONDS,
+    MIN_RUN_DISTANCE_M, MOVEMENT_MIN_SPEED_KMH, MOVEMENT_HOLD_FRAMES,
+    PISTA_LIMIT_M, LOCK_ID, UNLOCK_AFTER_LOST_SECONDS,
+    HUD_BOX_EMA_ALPHA, HUD_VALUE_EMA_ALPHA, HUD_UPDATE_EVERY_N_FRAMES,
+)
 
 
 def euclid(p1, p2):
@@ -63,6 +28,11 @@ def find_horse_class_id(model):
         if str(v).lower() == "horse":
             return int(k)
     return 17
+
+
+# Carrega o modelo uma única vez no startup
+_MODEL = YOLO(MODEL_PATH)
+_HORSE_CLS = find_horse_class_id(_MODEL)
 
 
 def _ema(prev, new, alpha: float):
@@ -84,9 +54,9 @@ def process_video(video_path: str, job_id: str, base_output: str = "output", sta
     output_csv = os.path.join(out_dir, "metrics.csv")
     output_summary = os.path.join(out_dir, "summary.csv")
     
-    if status_callback: status_callback("IA: Preparando ambiente e carregando YOLO...")
-    model = YOLO(MODEL_PATH)
-    horse_cls = find_horse_class_id(model)
+    if status_callback: status_callback("IA: Preparando ambiente...")
+    model = _MODEL
+    horse_cls = _HORSE_CLS
 
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -109,7 +79,7 @@ def process_video(video_path: str, job_id: str, base_output: str = "output", sta
 
     csv_file = open(output_csv, "w", newline="", encoding="utf-8")
     csv_writer = csv.writer(csv_file)
-    csv_writer.writerow(["frame", "tempo_s", "speed_kmh", "accel_m_s2", "time_to_max_speed_s", "status", "track_id"])
+    csv_writer.writerow(["frame", "tempo_s", "speed_kmh", "accel_m_s2", "time_to_max_speed_s", "status", "track_id", "cx", "cy"])
 
     last_center = None
     pixel_to_meter = None
@@ -262,7 +232,6 @@ def process_video(video_path: str, job_id: str, base_output: str = "output", sta
         if not (is_moving and status == "ok" and started):
             spd.total_distance = old_dist
 
-        PISTA_LIMIT_M = 120.0
         spd.total_distance = min(spd.total_distance, PISTA_LIMIT_M)
 
         # --- CONFIRMAÇÃO DE MOVIMENTO ---
@@ -304,13 +273,15 @@ def process_video(video_path: str, job_id: str, base_output: str = "output", sta
         
         # Gravação das métricas reais no CSV (para os gráficos do relatório)
         csv_writer.writerow([
-            frame_id, 
-            f"{tempo:.3f}", 
-            f"{float(speed_kmh):.3f}", 
-            f"{float(accel):.3f}", 
-            f"{float(spd.time_to_max_speed):.3f}", 
-            "ended_lost" if ending_now else status, 
-            str(cur_track_id) or ""
+            frame_id,
+            f"{tempo:.3f}",
+            f"{float(speed_kmh):.3f}",
+            f"{float(accel):.3f}",
+            f"{float(spd.time_to_max_speed):.3f}",
+            "ended_lost" if ending_now else status,
+            str(cur_track_id) or "",
+            f"{cur_pos[0]:.1f}" if cur_pos else "",
+            f"{cur_pos[1]:.1f}" if cur_pos else "",
         ])
 
         # Desenho no Frame
@@ -380,11 +351,14 @@ def process_video(video_path: str, job_id: str, base_output: str = "output", sta
         ])
 
     return {
+        "video_width": width,
+        "video_height": height,
         "max_speed": round(float(spd.max_speed), 2),
         "max_accel": round(float(spd.max_accel), 2),
         "impulse_m_s2": round(float(impulse_m_s2), 2),
         "avg_speed": round(float(avg_speed_kmh), 2),
         "distance": round(float(spd.total_distance), 2),
+        "efficiency_percent": round(min(efficiency_percent, 100.0), 1),
         "time_to_max_speed": round(float(spd.time_to_max_speed), 2),
         "start_time_s": round(float(start_time_s) if start_time_s is not None else 0.0, 3),
         "end_time_s": round(float(end_time_s) if end_time_s is not None else 0.0, 3),

@@ -1,30 +1,29 @@
 /* ============================================
-   PUXA.AI — Upload Designer
-   JavaScript
+   PUXA.AI — Análise Biomecânica
    ============================================ */
 
 document.addEventListener("DOMContentLoaded", () => {
-  // === DOM ELEMENTS ===
-  const dropZone = document.getElementById("dropZone");
-  const fileInput = document.getElementById("fileInput");
-  const btnSelect = document.getElementById("btnSelect");
-  const queueList = document.getElementById("queueList");
-  const queueEmpty = document.getElementById("queueEmpty");
-  const uploadActions = document.getElementById("uploadActions");
-  const btnClear = document.getElementById("btnClear");
-  const btnUpload = document.getElementById("btnUpload");
-  const totalFilesEl = document.getElementById("totalFiles");
-  const totalSizeEl = document.getElementById("totalSize");
-  const progressBar = document.getElementById("progressBar");
-  const progressText = document.getElementById("progressText");
-  const progressSpeed = document.getElementById("progressSpeed");
+
+  // === CONFIG ===
+  const API_BASE = "https://guireeis0-puxa-ai-var.hf.space";
+
+  // === DOM ===
+  const dropZone       = document.getElementById("dropZone");
+  const fileInput      = document.getElementById("fileInput");
+  const btnSelect      = document.getElementById("btnSelect");
   const toastContainer = document.getElementById("toastContainer");
+  const btnNewAnalysis = document.getElementById("btnNewAnalysis");
 
-  // === STATE ===
-  let fileQueue = [];
-  let isUploading = false;
+  // Processamento
+  const procFilename = document.getElementById("procFilename");
+  const procFilesize = document.getElementById("procFilesize");
+  const procMessage  = document.getElementById("procMessage");
+  const procPct      = document.getElementById("procPct");
+  const procBar      = document.getElementById("procBar");
+  const procLog      = document.getElementById("procLog");
+  const procFrames   = document.querySelector("[data-ia-frames]");
 
-  // === INJECT IA ANIMATION KEYFRAMES (apenas uma vez) ===
+  // === INJECT ANIMATION KEYFRAMES ===
   if (!document.getElementById("puxa-ia-styles")) {
     const s = document.createElement("style");
     s.id = "puxa-ia-styles";
@@ -59,26 +58,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.head.appendChild(s);
   }
 
-  // === FILE TYPE HELPERS ===
-  function getFileCategory(file) {
-    const ext = file.name.split(".").pop().toLowerCase();
-    const type = file.type;
-    if (type.startsWith("video/") || ["mp4","avi","mov","mkv","webm"].includes(ext)) return "video";
-    if (type.startsWith("image/") || ["jpg","jpeg","png","gif","webp","svg","bmp"].includes(ext)) return "image";
-    if (type === "application/pdf" || ext === "pdf") return "pdf";
-    if (["csv","xlsx","xls","json","xml"].includes(ext)) return "data";
-    if (["doc","docx","txt","rtf","odt"].includes(ext)) return "doc";
-    return "other";
-  }
-
-  function getFileIcon(category) {
-    const icons = {
-      video: "fas fa-video", image: "fas fa-image", pdf: "fas fa-file-pdf",
-      data: "fas fa-file-csv", doc: "fas fa-file-alt", other: "fas fa-file",
-    };
-    return icons[category] || icons.other;
-  }
-
+  // === HELPERS ===
   function formatSize(bytes) {
     if (bytes === 0) return "0 B";
     const k = 1024, sizes = ["B","KB","MB","GB"];
@@ -86,315 +66,22 @@ document.addEventListener("DOMContentLoaded", () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
   }
 
-  function getExtension(name) { return name.split(".").pop().toUpperCase(); }
-
-  // === GENERATE UNIQUE ID ===
-  let idCounter = 0;
-  function uniqueId() { return "file_" + Date.now() + "_" + idCounter++; }
-
-  // === ADD FILES TO QUEUE ===
-  function addFiles(files) {
-    const newFiles = Array.from(files);
-    if (newFiles.length === 0) return;
-    newFiles.forEach((file) => {
-      fileQueue.push({
-        id: uniqueId(), file, name: file.name, size: file.size,
-        category: getFileCategory(file), progress: 0, status: "pending",
-      });
-    });
-    renderQueue();
-    showToast("info", "Arquivos adicionados", `${newFiles.length} arquivo(s) na fila`);
+  // === STAGE CONTROL ===
+  function showStage(name) {
+    document.querySelectorAll(".stage").forEach(s => s.classList.remove("active"));
+    document.getElementById("stage" + name).classList.add("active");
   }
 
-  // === RENDER QUEUE ===
-  function renderQueue() {
-    if (totalFilesEl) totalFilesEl.textContent = fileQueue.length + " arquivo" + (fileQueue.length !== 1 ? "s" : "");
-    const totalBytes = fileQueue.reduce((sum, f) => sum + f.size, 0);
-    if (totalSizeEl) totalSizeEl.textContent = formatSize(totalBytes);
-
-    if (fileQueue.length === 0) {
-      if (queueEmpty) queueEmpty.style.display = "flex";
-      if (uploadActions) uploadActions.style.display = "none";
-      queueList.innerHTML = "";
-      return;
-    }
-
-    if (queueEmpty) queueEmpty.style.display = "none";
-    if (uploadActions) uploadActions.style.display = "block";
-
-    queueList.innerHTML = "";
-    fileQueue.forEach((item) => queueList.appendChild(createFileCard(item)));
-    updateGlobalProgress();
+  // === PROCESSING UI HELPERS ===
+  function updatePct(pct) {
+    if (procPct) procPct.textContent = pct + "%";
+    if (procBar) procBar.style.width = pct + "%";
+    _updateFrames(pct);
   }
 
-  // === CREATE FILE CARD ===
-  function createFileCard(item) {
-    const card = document.createElement("div");
-    card.className = `file-card ${item.status}`;
-    card.dataset.id = item.id;
-
-    const isActive   = item.status === "uploading" || item.status === "processing";
-    const isError    = item.status === "error";
-    const isComplete = item.status === "complete";
-    const isPending  = item.status === "pending";
-
-    const accent = isComplete ? "#4ade80" : isError ? "#f87171" : "#E8722A";
-    const barBg  = isComplete ? "#4ade80" : isError ? "#f87171"
-                 : "linear-gradient(90deg,#E8722A,#2E5BBA)";
-
-    // Painel IA: frames + barra de progresso + log
-    const iaPanel = (isActive || isError) ? `
-      <div data-ia-frames style="display:flex;gap:4px;margin-top:10px;">
-        ${Array.from({length:8}, (_, i) => `
-          <div data-frame="${i}" style="
-               flex:1; height:26px; border-radius:4px;
-               background:rgba(255,255,255,0.04);
-               border:1px solid rgba(255,255,255,0.08);
-               position:relative; overflow:hidden;">
-            <div class="puxa-scan-bar"></div>
-          </div>`).join("")}
-      </div>
-
-      <div style="margin-top:8px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-          <span data-ia-pct style="font-family:'Space Mono',monospace;font-size:10px;color:#E8722A;">0%</span>
-          <span data-ia-eta style="font-family:'Space Mono',monospace;font-size:10px;color:#6B7280;"></span>
-        </div>
-        <div style="height:5px;background:rgba(255,255,255,0.06);border-radius:99px;overflow:hidden;">
-          <div class="bar-fill" style="
-               height:100%; width:${item.status === 'uploading' ? item.progress : 0}%;
-               border-radius:99px; background:${barBg}; transition:width .35s ease;"></div>
-        </div>
-      </div>
-
-      <div data-ia-log style="
-           margin-top:10px;
-           background:rgba(255,255,255,0.02);
-           border:1px solid rgba(255,255,255,0.07);
-           border-radius:8px; padding:8px 12px;
-           min-height:50px; display:flex; flex-direction:column;
-           gap:3px; overflow:hidden;">
-        <span style="font-family:'Space Mono',monospace;font-size:10px;
-              color:#4B5563;font-style:italic;">Aguardando servidor...</span>
-      </div>` : "";
-
-    // Botões de download após conclusão
-    const dlBtns = (isComplete && item.downloadLinks) ? `
-      <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:6px;">
-        <a href="https://puxa-ai-backend.onrender.com${item.downloadLinks.report_pdf}" target="_blank"
-           style="background:#27ae60;color:#fff;padding:5px 11px;border-radius:5px;
-                  text-decoration:none;font-size:.72rem;font-weight:700;
-                  display:inline-flex;align-items:center;gap:5px;white-space:nowrap;">
-          <i class="fas fa-file-pdf"></i> PDF
-        </a>
-        <a href="https://puxa-ai-backend.onrender.com${item.downloadLinks.video}" target="_blank"
-           style="background:#27ae60;color:#fff;padding:5px 11px;border-radius:5px;
-                  text-decoration:none;font-size:.72rem;font-weight:700;
-                  display:inline-flex;align-items:center;gap:5px;white-space:nowrap;">
-          <i class="fas fa-video"></i> VÍDEO
-        </a>
-        <a href="https://puxa-ai-backend.onrender.com${item.downloadLinks.graph_png}" target="_blank"
-           style="background:#27ae60;color:#fff;padding:5px 11px;border-radius:5px;
-                  text-decoration:none;font-size:.72rem;font-weight:700;
-                  display:inline-flex;align-items:center;gap:5px;white-space:nowrap;">
-          <i class="fas fa-image"></i> GRÁFICO
-        </a>
-        <a href="https://puxa-ai-backend.onrender.com${item.downloadLinks.metrics_csv}" target="_blank"
-           style="background:#27ae60;color:#fff;padding:5px 11px;border-radius:5px;
-                  text-decoration:none;font-size:.72rem;font-weight:700;
-                  display:inline-flex;align-items:center;gap:5px;white-space:nowrap;">
-          <i class="fas fa-table"></i> MÉTRICAS
-        </a>
-        <a href="https://puxa-ai-backend.onrender.com${item.downloadLinks.summary_csv}" target="_blank"
-           style="background:#27ae60;color:#fff;padding:5px 11px;border-radius:5px;
-                  text-decoration:none;font-size:.72rem;font-weight:700;
-                  display:inline-flex;align-items:center;gap:5px;white-space:nowrap;">
-          <i class="fas fa-list"></i> RESUMO
-        </a>
-      </div>` : "";
-
-    card.innerHTML = `
-      <div class="file-icon ${item.category}">
-        <i class="${getFileIcon(item.category)}"></i>
-      </div>
-
-      <div class="file-info">
-        <div class="file-name" title="${item.name}">${item.name}</div>
-        <div class="file-meta">
-          <span class="file-size">${formatSize(item.size)}</span>
-          <span class="file-type">${getExtension(item.name)}</span>
-        </div>
-
-        ${!isPending ? `
-        <div style="margin-top:8px;display:flex;align-items:center;gap:7px;">
-          ${isActive
-            ? `<div style="display:flex;gap:3px;align-items:center;">
-                 <span class="puxa-dot" style="background:${accent};"></span>
-                 <span class="puxa-dot" style="background:${accent};"></span>
-                 <span class="puxa-dot" style="background:${accent};"></span>
-                 <span class="puxa-dot" style="background:${accent};"></span>
-                 <span class="puxa-dot" style="background:${accent};"></span>
-               </div>`
-            : `<i class="fas ${isComplete ? 'fa-check-circle' : 'fa-exclamation-circle'}"
-                  style="color:${accent};font-size:12px;"></i>`}
-          <span class="ia-message" style="
-                font-family:'Space Mono',monospace; font-size:10px;
-                font-weight:700; text-transform:uppercase;
-                letter-spacing:.6px; color:${accent};">
-            ${item.statusMessage
-              || (isActive   ? "IA: Iniciando..."
-                : isComplete ? "IA: Análise concluída"
-                :              "IA: Erro no processamento")}
-          </span>
-        </div>` : ""}
-
-        ${iaPanel}
-        ${dlBtns}
-      </div>
-
-      <div class="file-actions">
-        ${isComplete
-          ? `<i class="fas fa-check-circle" style="color:#4ade80;font-size:18px;"></i>`
-          : `<button class="file-action-btn" onclick="removeFile('${item.id}')" title="Remover">
-               <i class="fas fa-times"></i>
-             </button>`}
-      </div>
-    `;
-
-    return card;
-  }
-
-  // === REMOVE FILE ===
-  window.removeFile = function (id) {
-    if (isUploading) return;
-    fileQueue = fileQueue.filter((f) => f.id !== id);
-    renderQueue();
-  };
-
-  // === CLEAR QUEUE ===
-  btnClear.addEventListener("click", () => {
-    if (isUploading) return;
-    fileQueue = [];
-    renderQueue();
-    showToast("info", "Fila limpa", "Todos os arquivos foram removidos");
-  });
-
-  btnUpload.addEventListener("click", (e) => {
-    e.preventDefault();
-    console.log("Clique detectado!");
-    if (isUploading) return;
-    const pendingFiles = fileQueue.filter((f) => f.status === "pending");
-    if (pendingFiles.length === 0) {
-      showToast("info", "Nada para enviar", "Todos os arquivos já foram enviados");
-      return;
-    }
-    console.log("Enviando arquivos:", pendingFiles);
-    startUpload(pendingFiles);
-  });
-
-  async function startUpload(files) {
-    isUploading = true;
-    btnUpload.disabled = true;
-    btnUpload.innerHTML = '<i class="fas fa-spinner fa-spin"></i> PROCESSANDO IA...';
-
-    const category = document.getElementById("categorySelect").value;
-    const mode = (category === "prova") ? "performance" : "var";
-    const pendingFiles = files.filter(f => f.status === "pending" || f.status === "error");
-
-    for (let i = 0; i < pendingFiles.length; i++) {
-      const item = pendingFiles[i];
-      item.status = "uploading";
-      item.progress = 0;
-      item.statusMessage = "IA: Preparando conexão...";
-      renderQueue();
-
-      try {
-        await realFileUpload(item, mode);
-        console.log(`✅ Upload concluído para: ${item.name}`);
-      } catch (error) {
-        console.error(`❌ Erro no arquivo ${item.name}:`, error);
-        item.status = "error";
-        item.statusMessage = "IA: Falha no envio do arquivo.";
-        renderQueue();
-      }
-    }
-
-    isUploading = false;
-    btnUpload.disabled = false;
-    btnUpload.innerHTML = '<i class="fas fa-rocket"></i> ENVIAR TODOS';
-  }
-
-  function realFileUpload(item, mode) {
-    return new Promise((resolve, reject) => {
-      const formData = new FormData();
-      formData.append("video", item.file);
-      formData.append("mode", mode);
-
-      const xhr = new XMLHttpRequest();
-      xhr.open("POST", "https://puxa-ai-backend.onrender.com/upload", true);
-
-      xhr.upload.onprogress = (e) => {
-        if (e.lengthComputable) {
-          const pct = Math.floor((e.loaded / e.total) * 100);
-          item.progress = pct;
-          item.statusMessage = pct < 100
-            ? `IA: Subindo arquivo (${pct}%)`
-            : "IA: Recebido! Aguardando servidor...";
-
-          // Atualização cirúrgica — sem re-render completo
-          const card = document.querySelector(`.file-card[data-id="${item.id}"]`);
-          if (card) {
-            const msgEl = card.querySelector(".ia-message");
-            const barEl = card.querySelector(".bar-fill");
-            const pctEl = card.querySelector("[data-ia-pct]");
-            if (msgEl) msgEl.textContent = item.statusMessage;
-            if (barEl) barEl.style.width = pct + "%";
-            if (pctEl) pctEl.textContent = pct + "%";
-            _updateFrames(card, pct);
-          }
-        }
-      };
-
-      xhr.onload = function () {
-        if (xhr.status === 202) {
-          try {
-            const response = JSON.parse(xhr.responseText);
-            if (response.job_id) {
-              console.log(`[${item.name}] Job ID recebido: ${response.job_id}`);
-              monitorarProcessamento(item, response.job_id, resolve);
-            } else {
-              throw new Error("Job ID não retornado pelo servidor.");
-            }
-          } catch (err) {
-            item.status = "error";
-            item.statusMessage = "IA: Erro na resposta do servidor.";
-            renderQueue();
-            reject(err);
-          }
-        } else {
-          item.status = "error";
-          item.statusMessage = `Erro ${xhr.status}: Falha no servidor.`;
-          renderQueue();
-          reject(new Error(`Erro ${xhr.status}`));
-        }
-      };
-
-      xhr.onerror = () => {
-        item.status = "error";
-        item.statusMessage = "IA: Erro de conexão com o servidor.";
-        renderQueue();
-        reject(new Error("Erro de rede."));
-      };
-
-      xhr.send(formData);
-    });
-  }
-
-  // === HELPERS: atualização direta no DOM (sem re-render) ===
-
-  // Marca frames conforme a porcentagem avança
-  function _updateFrames(card, pct) {
-    const frames = card.querySelectorAll("[data-frame]");
+  function _updateFrames(pct) {
+    if (!procFrames) return;
+    const frames = procFrames.querySelectorAll("[data-frame]");
     const done = Math.round((pct / 100) * frames.length);
     frames.forEach((f, i) => {
       if (i < done && !f.dataset.done) {
@@ -407,94 +94,364 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Adiciona linha no log (máximo 3 visíveis, circular)
-  function _pushLog(card, text) {
-    const logBox = card.querySelector("[data-ia-log]");
-    if (!logBox) return;
+  function resetFrames() {
+    if (!procFrames) return;
+    procFrames.querySelectorAll("[data-frame]").forEach(f => {
+      delete f.dataset.done;
+      f.style.background = "";
+      f.style.borderColor = "";
+      const scan = f.querySelector(".puxa-scan-bar");
+      if (scan) scan.style.display = "";
+    });
+  }
+
+  function pushLog(text) {
+    if (!procLog) return;
     const colors = ["#E8722A", "#9CA3AF", "#6B7280"];
     const line = document.createElement("span");
     line.className = "puxa-log-line";
     line.style.cssText = `
       font-family:'Space Mono',monospace; font-size:10px;
-      color:${colors[logBox.children.length % colors.length]};
+      color:${colors[procLog.children.length % colors.length]};
       white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block;`;
     line.textContent = text;
-    logBox.appendChild(line);
-    while (logBox.children.length > 3) logBox.removeChild(logBox.firstChild);
+    procLog.appendChild(line);
+    while (procLog.children.length > 3) procLog.removeChild(procLog.firstChild);
   }
 
-  // === POLLING: Monitora processamento da IA no servidor ===
-  function monitorarProcessamento(item, jobId, resolve) {
-    item.status = "processing";
-    item.statusMessage = "IA: Iniciando motores...";
+  function resetProcessingUI(file) {
+    if (procFilename) procFilename.textContent = file.name;
+    if (procFilesize) procFilesize.textContent = formatSize(file.size);
+    if (procMessage)  procMessage.textContent  = "IA: Iniciando...";
+    if (procLog) procLog.innerHTML = `<span style="font-family:'Space Mono',monospace;font-size:10px;color:#4B5563;font-style:italic;">Aguardando servidor...</span>`;
+    updatePct(0);
+    resetFrames();
+  }
 
-    // Renderiza uma vez para montar o painel de IA no card
-    renderQueue();
+  // === UPLOAD & PIPELINE ===
+  const MAX_FILE_BYTES    = 100 * 1024 * 1024; // 100 MB — igual ao backend
+  const MAX_DURATION_WARN = 120;               // 2 min — avisa mas não bloqueia
 
-    let lastPct = 0;
+  function handleFile(file) {
+    if (!file || !file.type.startsWith("video/")) {
+      showToast("error", "Formato inválido", "Envie um arquivo de vídeo (MP4, MOV, AVI, MKV)");
+      return;
+    }
 
-    const checkInterval = setInterval(async () => {
+    if (file.size > MAX_FILE_BYTES) {
+      showToast("error", "Arquivo muito grande", `O limite é 100 MB. O seu arquivo tem ${formatSize(file.size)}. Comprima ou corte o vídeo antes de enviar.`);
+      return;
+    }
+
+    const tempVideo = document.createElement("video");
+    tempVideo.preload = "metadata";
+    const url = URL.createObjectURL(file);
+    tempVideo.src = url;
+
+    tempVideo.onloadedmetadata = () => {
+      URL.revokeObjectURL(url);
+      const dur = tempVideo.duration;
+      if (dur > MAX_DURATION_WARN) {
+        const m = Math.floor(dur / 60);
+        const s = Math.round(dur % 60);
+        showToast("info", "Vídeo longo detectado", `Este vídeo tem ${m}m ${s}s. O processamento pode demorar. Para melhores resultados, use clipes de até 2 minutos.`);
+      }
+      resetProcessingUI(file);
+      showStage("Processing");
+      startUpload(file);
+    };
+
+    tempVideo.onerror = () => {
+      URL.revokeObjectURL(url);
+      resetProcessingUI(file);
+      showStage("Processing");
+      startUpload(file);
+    };
+  }
+
+  function startUpload(file) {
+    const formData = new FormData();
+    formData.append("video", file);
+    formData.append("mode", "performance");
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_BASE}/upload`, true);
+
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        const pct = Math.floor((e.loaded / e.total) * 100);
+        const msg = pct < 100 ? `IA: Subindo arquivo (${pct}%)` : "IA: Recebido! Aguardando servidor...";
+        if (procMessage) procMessage.textContent = msg;
+        updatePct(pct);
+      }
+    };
+
+    xhr.onload = () => {
+      if (xhr.status === 202) {
+        try {
+          const resp = JSON.parse(xhr.responseText);
+          if (resp.job_id) monitorarProcessamento(resp.job_id);
+          else throw new Error("Job ID não retornado");
+        } catch (err) {
+          showError("Erro na resposta do servidor.");
+        }
+      } else {
+        showError(`Erro ${xhr.status}: Falha no servidor.`);
+      }
+    };
+
+    xhr.onerror = () => showError("Erro de conexão com o servidor.");
+    xhr.send(formData);
+  }
+
+  function monitorarProcessamento(jobId) {
+    // Reseta UI para a fase de processamento do servidor
+    resetFrames();
+    updatePct(0);
+    if (procMessage) procMessage.textContent = "IA: Iniciando motores...";
+
+    let lastPct = -1;
+    let networkErrors = 0;
+    const MAX_NETWORK_ERRORS = 5;
+    const startedAt = Date.now();
+    const TIMEOUT_MS = 10 * 60 * 1000;
+
+    const interval = setInterval(async () => {
+      if (Date.now() - startedAt > TIMEOUT_MS) {
+        clearInterval(interval);
+        showError("Tempo limite excedido.");
+        return;
+      }
+
       try {
-        const res = await fetch(`https://puxa-ai-backend.onrender.com/status/${jobId}`);
+        const res = await fetch(`${API_BASE}/status/${jobId}`);
         if (!res.ok) return;
+        networkErrors = 0;
         const data = await res.json();
 
         if (data.message) {
-          item.statusMessage = data.message;
-
+          if (procMessage) procMessage.textContent = data.message;
           const match = data.message.match(/(\d+)%/);
           const pct = match ? parseInt(match[1]) : lastPct;
-
-          // Atualização cirúrgica no DOM — sem piscar
-          const card = document.querySelector(`.file-card[data-id="${item.id}"]`);
-          if (card) {
-            const msgEl = card.querySelector(".ia-message");
-            if (msgEl) msgEl.textContent = data.message;
-
-            if (pct > lastPct) {
-              const barEl = card.querySelector(".bar-fill");
-              const pctEl = card.querySelector("[data-ia-pct]");
-              if (barEl) barEl.style.width = pct + "%";
-              if (pctEl) pctEl.textContent = pct + "%";
-              _updateFrames(card, pct);
-              lastPct = pct;
-            }
-
-            _pushLog(card, "› " + data.message);
-          }
+          if (pct > lastPct) { updatePct(pct); lastPct = pct; }
+          pushLog("› " + data.message);
         }
 
         if (data.status === "completed") {
-          clearInterval(checkInterval);
-          item.status = "complete";
-          item.downloadLinks = data.downloads;
-          renderQueue();
-
-          resolve();
-
+          clearInterval(interval);
+          showDashboard(data);
         } else if (data.status === "error") {
-          clearInterval(checkInterval);
-          item.status = "error";
-          item.statusMessage = "IA: Erro no processamento.";
-          renderQueue();
-          resolve();
+          clearInterval(interval);
+          showError("Erro no processamento.");
         }
       } catch (err) {
-        console.error("Erro no polling:", err);
+        networkErrors++;
+        if (networkErrors >= MAX_NETWORK_ERRORS) {
+          clearInterval(interval);
+          showError("Servidor inacessível.");
+        }
       }
     }, 1000);
   }
 
-  function updateGlobalProgress() {
-    if (!progressBar) return;
-    if (fileQueue.length === 0) { progressBar.style.width = "0%"; return; }
-    const totalProgress = fileQueue.reduce((sum, f) => sum + f.progress, 0);
-    const avg = Math.floor(totalProgress / fileQueue.length);
-    progressBar.style.width = avg + "%";
-    if (progressText) progressText.textContent = avg + "% concluído";
-    const completed = fileQueue.filter((f) => f.status === "complete").length;
-    if (progressSpeed) progressSpeed.textContent = completed + "/" + fileQueue.length + " arquivos";
+  function showError(msg) {
+    if (procMessage) procMessage.textContent = "IA: " + msg;
+    showToast("error", "Erro", msg);
   }
+
+  // === DASHBOARD ===
+  let speedChart = null;
+  let accelChart = null;
+
+  function showDashboard(data) {
+    const r  = data.result || {};
+    const dl = data.downloads || {};
+
+    document.getElementById("dashFilename").textContent     = procFilename ? procFilename.textContent : "—";
+    document.getElementById("dashMaxSpeed").textContent     = r.max_speed         != null ? parseFloat(r.max_speed).toFixed(1)         : "—";
+    document.getElementById("dashAvgSpeed").textContent     = r.avg_speed         != null ? parseFloat(r.avg_speed).toFixed(1)         : "—";
+    document.getElementById("dashDistance").textContent     = r.distance          != null ? parseFloat(r.distance).toFixed(1)          : "—";
+    document.getElementById("dashRunTime").textContent      = r.run_time_s        != null ? parseFloat(r.run_time_s).toFixed(1)        : "—";
+    document.getElementById("dashMaxAccel").textContent     = r.max_accel         != null ? parseFloat(r.max_accel).toFixed(2)         : "—";
+    document.getElementById("dashEfficiency").textContent   = r.efficiency_percent != null ? parseFloat(r.efficiency_percent).toFixed(1) : "—";
+    document.getElementById("dashAiAnalysis").innerHTML     = r.ai_analysis || "Análise biomecânica concluída.";
+
+    const dlMap = [
+      { key: "report_pdf",  icon: "fa-file-pdf", label: "Relatório PDF" },
+      { key: "video",       icon: "fa-video",    label: "Vídeo Resultado" },
+      { key: "graph_png",   icon: "fa-image",    label: "Gráfico PNG" },
+      { key: "metrics_csv", icon: "fa-table",    label: "Métricas CSV" },
+      { key: "summary_csv", icon: "fa-list",     label: "Resumo CSV" },
+    ];
+    document.getElementById("dashDlBtns").innerHTML = dlMap.filter(d => dl[d.key]).map(d =>
+      `<a class="dash-dl-btn" href="${API_BASE}${dl[d.key]}" target="_blank">
+         <i class="fas ${d.icon}"></i> ${d.label}
+       </a>`
+    ).join("");
+
+    showStage("Dashboard");
+
+    if (dl.metrics_csv) {
+      fetch(`${API_BASE}${dl.metrics_csv}`)
+        .then(res => res.text())
+        .then(csv => {
+          renderCharts(csv);
+          renderHeatmap(csv, r.video_width, r.video_height);
+        })
+        .catch(() => {});
+    }
+  }
+
+  function renderHeatmap(csv, videoWidth, videoHeight) {
+    const canvas = document.getElementById("heatmapCanvas");
+    if (!canvas) return;
+    const rows    = csv.trim().split("\n");
+    const headers = rows[0].split(",").map(h => h.trim());
+    const iSpeed  = headers.indexOf("speed_kmh");
+    const iCx     = headers.indexOf("cx");
+    const iCy     = headers.indexOf("cy");
+    if (iCx === -1 || iCy === -1) {
+      const ctx2 = canvas.getContext("2d");
+      canvas.width  = canvas.parentElement.clientWidth || 800;
+      canvas.height = 160;
+      ctx2.fillStyle = "rgba(10,20,40,0.85)";
+      ctx2.fillRect(0, 0, canvas.width, canvas.height);
+      ctx2.fillStyle = "#4B5563";
+      ctx2.font = "13px 'Space Mono', monospace";
+      ctx2.textAlign = "center";
+      ctx2.fillText("Reinicie o servidor e processe um novo vídeo para ver o mapa de calor.", canvas.width / 2, canvas.height / 2);
+      return;
+    }
+    const points = [];
+    let maxSpeed = 0;
+    for (let i = 1; i < rows.length; i++) {
+      const cols = rows[i].split(",");
+      const cx = parseFloat(cols[iCx]);
+      const cy = parseFloat(cols[iCy]);
+      const sp = parseFloat(cols[iSpeed]);
+      if (!isNaN(cx) && !isNaN(cy) && !isNaN(sp)) {
+        points.push({ cx, cy, sp });
+        if (sp > maxSpeed) maxSpeed = sp;
+      }
+    }
+    if (points.length === 0) return;
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    for (const p of points) {
+      if (p.cx < minX) minX = p.cx;
+      if (p.cx > maxX) maxX = p.cx;
+      if (p.cy < minY) minY = p.cy;
+      if (p.cy > maxY) maxY = p.cy;
+    }
+    const padX = (maxX - minX) * 0.08;
+    const padY = (maxY - minY) * 0.08;
+    minX -= padX; maxX += padX;
+    minY -= padY; maxY += padY;
+    const displayW = canvas.parentElement.clientWidth || 800;
+    const displayH = Math.min(320, Math.round(displayW * 0.38));
+    canvas.width  = displayW;
+    canvas.height = displayH;
+    const scaleX = displayW / (maxX - minX || 1);
+    const scaleY = displayH / (maxY - minY || 1);
+    const radius = Math.max(10, Math.round(Math.min(displayW, displayH) / 35));
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, displayW, displayH);
+    ctx.fillStyle = "rgba(10,20,40,0.85)";
+    ctx.fillRect(0, 0, displayW, displayH);
+    for (const p of points) {
+      const x = (p.cx - minX) * scaleX;
+      const y = (p.cy - minY) * scaleY;
+      const t = maxSpeed > 0 ? p.sp / maxSpeed : 0;
+      let r, g, b;
+      if (t < 0.4) {
+        const f = t / 0.4;
+        r = Math.round(59  + f * (16  - 59));
+        g = Math.round(130 + f * (185 - 130));
+        b = Math.round(246 + f * (129 - 246));
+      } else if (t < 0.7) {
+        const f = (t - 0.4) / 0.3;
+        r = Math.round(16  + f * (232 - 16));
+        g = Math.round(185 + f * (114 - 185));
+        b = Math.round(129 + f * (42  - 129));
+      } else {
+        const f = (t - 0.7) / 0.3;
+        r = Math.round(232 + f * (239 - 232));
+        g = Math.round(114 + f * (68  - 114));
+        b = Math.round(42  + f * (68  - 42));
+      }
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, radius);
+      grad.addColorStop(0,   `rgba(${r},${g},${b},0.55)`);
+      grad.addColorStop(0.5, `rgba(${r},${g},${b},0.2)`);
+      grad.addColorStop(1,   `rgba(${r},${g},${b},0)`);
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(x, y, radius, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  function renderCharts(csv) {
+    const rows    = csv.trim().split("\n");
+    const headers = rows[0].split(",").map(h => h.trim());
+    const iTime   = headers.indexOf("tempo_s");
+    const iSpeed  = headers.indexOf("speed_kmh");
+    const iAccel  = headers.indexOf("accel_m_s2");
+
+    const times = [], speeds = [], accels = [];
+    for (let i = 1; i < rows.length; i++) {
+      const cols = rows[i].split(",");
+      const t = parseFloat(cols[iTime]);
+      const s = parseFloat(cols[iSpeed]);
+      const a = parseFloat(cols[iAccel]);
+      if (!isNaN(t) && !isNaN(s)) {
+        times.push(t.toFixed(2));
+        speeds.push(s);
+        accels.push(isNaN(a) ? 0 : a);
+      }
+    }
+
+    const smooth = (arr, w = 7) => arr.map((_, i) => {
+      const slice = arr.slice(Math.max(0, i - w + 1), i + 1);
+      return slice.reduce((a, b) => a + b, 0) / slice.length;
+    });
+
+    const base = {
+      responsive: true,
+      animation: { duration: 600 },
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: "#6B7280", font: { size: 10 } }, grid: { color: "rgba(255,255,255,0.05)" } },
+        y: { ticks: { color: "#6B7280", font: { size: 10 } }, grid: { color: "rgba(255,255,255,0.05)" } },
+      }
+    };
+
+    if (speedChart) speedChart.destroy();
+    speedChart = new Chart(document.getElementById("chartSpeed"), {
+      type: "line",
+      data: {
+        labels: times,
+        datasets: [{ data: smooth(speeds), borderColor: "#3B82F6", backgroundColor: "rgba(59,130,246,0.1)", fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 }]
+      },
+      options: { ...base, scales: { ...base.scales, y: { ...base.scales.y, title: { display: true, text: "km/h", color: "#9CA3AF" } } } }
+    });
+
+    if (accelChart) accelChart.destroy();
+    accelChart = new Chart(document.getElementById("chartAccel"), {
+      type: "line",
+      data: {
+        labels: times,
+        datasets: [{ data: smooth(accels), borderColor: "#10B981", backgroundColor: "rgba(16,185,129,0.08)", fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 }]
+      },
+      options: { ...base, scales: { ...base.scales, y: { ...base.scales.y, title: { display: true, text: "m/s²", color: "#9CA3AF" } } } }
+    });
+  }
+
+  // === NOVA ANÁLISE ===
+  btnNewAnalysis.addEventListener("click", () => {
+    if (speedChart) { speedChart.destroy(); speedChart = null; }
+    if (accelChart) { accelChart.destroy(); accelChart = null; }
+    fileInput.value = "";
+    showStage("Upload");
+  });
 
   // === DRAG & DROP ===
   dropZone.addEventListener("dragenter", (e) => { e.preventDefault(); dropZone.classList.add("drag-over"); });
@@ -506,7 +463,8 @@ document.addEventListener("DOMContentLoaded", () => {
   dropZone.addEventListener("drop", (e) => {
     e.preventDefault();
     dropZone.classList.remove("drag-over");
-    addFiles(e.dataTransfer.files);
+    const file = e.dataTransfer.files[0];
+    if (file) handleFile(file);
   });
 
   // === CLICK TO SELECT ===
@@ -515,17 +473,17 @@ document.addEventListener("DOMContentLoaded", () => {
     fileInput.click();
   });
   btnSelect.addEventListener("click", (e) => { e.stopPropagation(); fileInput.click(); });
-  fileInput.addEventListener("change", () => { addFiles(fileInput.files); fileInput.value = ""; });
+  fileInput.addEventListener("change", () => {
+    const file = fileInput.files[0];
+    if (file) handleFile(file);
+    fileInput.value = "";
+  });
 
-  // === TOAST NOTIFICATIONS ===
+  // === TOAST ===
   function showToast(type, title, message) {
     const toast = document.createElement("div");
     toast.className = `toast ${type}`;
-    const icons = {
-      success: "fas fa-check-circle",
-      error: "fas fa-exclamation-triangle",
-      info: "fas fa-info-circle",
-    };
+    const icons = { success: "fas fa-check-circle", error: "fas fa-exclamation-triangle", info: "fas fa-info-circle" };
     toast.innerHTML = `
       <div class="toast-icon"><i class="${icons[type]}"></i></div>
       <div class="toast-content">
@@ -533,13 +491,10 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="toast-message">${message}</div>
       </div>`;
     toastContainer.appendChild(toast);
-    setTimeout(() => {
-      toast.classList.add("removing");
-      setTimeout(() => toast.remove(), 300);
-    }, 3500);
+    setTimeout(() => { toast.classList.add("removing"); setTimeout(() => toast.remove(), 300); }, 3500);
   }
 
-  // === KEYBOARD SHORTCUT ===
+  // === KEYBOARD ===
   document.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && e.key === "u") { e.preventDefault(); fileInput.click(); }
   });
