@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puxa.ai — Painel Admin</title>
+  <link rel="icon" href="puxa-ai-site/assets/icone-app.jpg" type="image/jpeg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500&family=Space+Mono:wght@400;700&display=swap">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0d1f35;
+      color: #fff;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .card {
+      background: #111c30;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 2.5rem;
+      width: 100%;
+      max-width: 460px;
+    }
+
+    .logo {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 800;
+      font-size: 1.5rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .logo span { color: #E8722A; }
+
+    .subtitle {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: #6B7280;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 2rem;
+    }
+
+    .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+      margin-bottom: 2rem;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: #6B7280;
+      margin-bottom: 0.4rem;
+      font-family: 'Space Mono', monospace;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    input {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 0.9rem 1.1rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      color: #fff;
+      outline: none;
+      margin-bottom: 1.2rem;
+      transition: border-color 0.2s;
+    }
+
+    input:focus { border-color: #E8722A; box-shadow: 0 0 0 3px rgba(232,114,42,0.12); }
+    input::placeholder { color: rgba(255,255,255,0.25); }
+
+    button {
+      width: 100%;
+      background: #E8722A;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 0.95rem;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      margin-top: 0.4rem;
+    }
+
+    button:hover { background: #d4631f; transform: translateY(-2px); }
+    button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .result-box {
+      display: none;
+      margin-top: 1.5rem;
+      background: rgba(74,222,128,0.07);
+      border: 1px solid rgba(74,222,128,0.2);
+      border-radius: 12px;
+      padding: 1.2rem;
+    }
+
+    .result-box.error {
+      background: rgba(248,113,113,0.07);
+      border-color: rgba(248,113,113,0.2);
+    }
+
+    .result-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #4ade80;
+      margin-bottom: 0.6rem;
+    }
+
+    .result-box.error .result-label { color: #f87171; }
+
+    .result-link {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.8rem;
+      color: #fff;
+      word-break: break-all;
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+
+    .result-meta {
+      font-size: 0.75rem;
+      color: #6B7280;
+      margin-bottom: 1rem;
+    }
+
+    .copy-btn {
+      width: auto;
+      background: rgba(255,255,255,0.08);
+      padding: 0.6rem 1.2rem;
+      font-size: 0.85rem;
+      border-radius: 8px;
+      margin-top: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .copy-btn:hover { background: rgba(255,255,255,0.15); transform: none; }
+
+    .copy-btn.copied { background: rgba(74,222,128,0.15); color: #4ade80; }
+
+    #screen-lock { display: block; }
+    #screen-main { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- TELA DE SENHA -->
+  <div class="card" id="screen-lock">
+    <div class="logo">Puxa<span>.ai</span></div>
+    <div class="subtitle">Painel Administrativo</div>
+    <div class="divider"></div>
+
+    <label for="input-key">Senha de acesso</label>
+    <input type="password" id="input-key" placeholder="Digite a senha admin" autocomplete="current-password">
+
+    <div id="lock-error" style="font-size:0.8rem;color:#f87171;margin-bottom:1rem;min-height:1.2em;"></div>
+
+    <button id="btn-unlock" type="button">Entrar</button>
+  </div>
+
+  <!-- TELA PRINCIPAL -->
+  <div class="card" id="screen-main">
+    <div class="logo">Puxa<span>.ai</span></div>
+    <div class="subtitle">Gerar link de acesso</div>
+    <div class="divider"></div>
+
+    <label for="input-email">E-mail do lead aprovado</label>
+    <input type="email" id="input-email" placeholder="lead@email.com">
+
+    <label for="input-dias" style="margin-top:0.2rem;">Dias de acesso</label>
+    <input type="number" id="input-dias" value="7" min="1" max="365">
+
+    <button id="btn-gerar" type="button">Gerar link de acesso</button>
+
+    <div class="result-box" id="result">
+      <div class="result-label" id="result-label">Link gerado</div>
+      <div class="result-link" id="result-link"></div>
+      <div class="result-meta" id="result-meta"></div>
+      <button class="copy-btn" id="btn-copy" type="button">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+          <rect x="1" y="4" width="9" height="9" rx="2" stroke="currentColor" stroke-width="1.3"/>
+          <path d="M4 4V3a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-1" stroke="currentColor" stroke-width="1.3"/>
+        </svg>
+        Copiar link
+      </button>
+    </div>
+  </div>
+
+  <script>
+    let adminKey = '';
+
+    // === TELA DE SENHA ===
+    const btnUnlock = document.getElementById('btn-unlock');
+    const inputKey  = document.getElementById('input-key');
+    const lockError = document.getElementById('lock-error');
+
+    function tryUnlock() {
+      const val = inputKey.value.trim();
+      if (!val) { lockError.textContent = 'Digite a senha.'; return; }
+      adminKey = val;
+      document.getElementById('screen-lock').style.display = 'none';
+      document.getElementById('screen-main').style.display = 'block';
+    }
+
+    btnUnlock.addEventListener('click', tryUnlock);
+    inputKey.addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
+
+    // === GERAR LINK ===
+    const btnGerar    = document.getElementById('btn-gerar');
+    const inputEmail  = document.getElementById('input-email');
+    const inputDias   = document.getElementById('input-dias');
+    const resultBox   = document.getElementById('result');
+    const resultLabel = document.getElementById('result-label');
+    const resultLink  = document.getElementById('result-link');
+    const resultMeta  = document.getElementById('result-meta');
+    const btnCopy     = document.getElementById('btn-copy');
+
+    btnGerar.addEventListener('click', async () => {
+      const email = inputEmail.value.trim();
+      const dias  = parseInt(inputDias.value) || 7;
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showResult(null, 'E-mail inválido.');
+        return;
+      }
+
+      btnGerar.disabled = true;
+      btnGerar.textContent = 'Gerando...';
+
+      try {
+        const resp = await fetch('/admin/generate-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, admin_key: adminKey, dias })
+        });
+
+        const data = await resp.json();
+
+        if (!resp.ok) {
+          if (resp.status === 403) {
+            adminKey = '';
+            document.getElementById('screen-main').style.display = 'none';
+            document.getElementById('screen-lock').style.display = 'block';
+            lockError.textContent = 'Senha incorreta.';
+          }
+          showResult(null, data.error || 'Erro ao gerar link.');
+        } else {
+          showResult(data.link, null, data.expires_at);
+        }
+      } catch (e) {
+        showResult(null, 'Erro de conexão. Verifique se o servidor está rodando.');
+      } finally {
+        btnGerar.disabled = false;
+        btnGerar.textContent = 'Gerar link de acesso';
+      }
+    });
+
+    function showResult(link, error, expiresAt) {
+      resultBox.style.display = 'block';
+      if (error) {
+        resultBox.classList.add('error');
+        resultLabel.textContent = 'Erro';
+        resultLink.textContent = error;
+        resultMeta.textContent = '';
+        btnCopy.style.display = 'none';
+      } else {
+        resultBox.classList.remove('error');
+        resultLabel.textContent = 'Link gerado com sucesso';
+        resultLink.textContent = link;
+        const exp = new Date(expiresAt);
+        resultMeta.textContent = `Expira em: ${exp.toLocaleDateString('pt-BR')} às ${exp.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'})}`;
+        btnCopy.style.display = 'inline-flex';
+        btnCopy.classList.remove('copied');
+        btnCopy.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="9" height="9" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M4 4V3a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-1" stroke="currentColor" stroke-width="1.3"/></svg> Copiar link`;
+      }
+    }
+
+    btnCopy.addEventListener('click', () => {
+      navigator.clipboard.writeText(resultLink.textContent).then(() => {
+        btnCopy.classList.add('copied');
+        btnCopy.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7L5.5 10.5L12 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Copiado!`;
+        setTimeout(() => {
+          btnCopy.classList.remove('copied');
+          btnCopy.innerHTML = `<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="9" height="9" rx="2" stroke="currentColor" stroke-width="1.3"/><path d="M4 4V3a2 2 0 0 1 2-2h5a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2h-1" stroke="currentColor" stroke-width="1.3"/></svg> Copiar link`;
+        }, 2500);
+      });
+    });
+  </script>
+
+</body>
+</html>

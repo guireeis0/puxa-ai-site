@@ -18,7 +18,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 if BASE_DIR not in sys.path:
     sys.path.insert(0, BASE_DIR)
 
-from flask import Flask, request, jsonify, send_file, send_from_directory
+from flask import Flask, request, jsonify, send_file, send_from_directory, redirect
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from analytics import generate_report
@@ -26,6 +26,7 @@ from report import generate_pdf_report
 from var import var_bp
 from main import process_video as process_performance
 from config import ALLOWED_EXTENSIONS, MAX_UPLOAD_BYTES
+from datetime import datetime, timedelta, timezone
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -44,6 +45,33 @@ def _inject_var_env():
 app.register_blueprint(var_bp, url_prefix="/var")
 
 PROJECT_ROOT = os.path.abspath(os.path.join(BASE_DIR, ".."))
+
+# === SUPABASE CONFIG ===
+_SUPA_URL  = os.environ.get('SUPABASE_URL', '')
+_SUPA_KEY  = os.environ.get('SUPABASE_SERVICE_KEY', '')
+ADMIN_KEY  = os.environ.get('ADMIN_KEY', '')
+
+def _supa(method, table, data=None, params=None):
+    headers = {
+        'apikey': _SUPA_KEY,
+        'Authorization': f'Bearer {_SUPA_KEY}',
+        'Content-Type': 'application/json',
+        'Prefer': 'return=representation'
+    }
+    return requests.request(
+        method,
+        f"{_SUPA_URL}/rest/v1/{table}",
+        headers=headers, json=data, params=params, timeout=5
+    )
+
+def _token_valido(token):
+    if not _SUPA_KEY:
+        return True  # dev sem Supabase configurado: libera acesso
+    resp = _supa('GET', 'access_tokens', params={'token': f'eq.{token}', 'select': 'expires_at'})
+    if resp.status_code != 200 or not resp.json():
+        return False
+    exp = datetime.fromisoformat(resp.json()[0]['expires_at'].replace('Z', '+00:00'))
+    return exp > datetime.now(timezone.utc)
 
 UPLOAD_FOLDER = os.path.join(PROJECT_ROOT, "uploads")
 OUTPUT_FOLDER = os.path.join(PROJECT_ROOT, "output")
@@ -242,6 +270,81 @@ def download_file(job_id, filename):
     if not os.path.exists(file_path):
         return jsonify({"error": "Arquivo não encontrado"}), 404
     return send_file(file_path, as_attachment=True)
+
+# ============================================================
+# DEMO — Acesso por Token Temporário (7 dias)
+# ============================================================
+@app.route("/demo/<token>")
+def serve_demo(token):
+    if not _token_valido(token):
+        return redirect('/')
+    return send_from_directory(DIST_FOLDER, "analisar.html")
+
+@app.route("/admin")
+def serve_admin():
+    return send_from_directory(PROJECT_ROOT, "admin.html")
+
+@app.route("/admin/generate-token", methods=["POST"])
+def generate_token():
+    data = request.get_json(silent=True) or {}
+    if not ADMIN_KEY or data.get('admin_key') != ADMIN_KEY:
+        return jsonify({"error": "Não autorizado"}), 403
+
+    email = str(data.get('email', '')).strip()
+    if not email:
+        return jsonify({"error": "Email obrigatório"}), 400
+
+    expires_at = (datetime.now(timezone.utc) + timedelta(days=7)).isoformat()
+    resp = _supa('POST', 'access_tokens', data={'lead_email': email, 'expires_at': expires_at})
+    if resp.status_code not in (200, 201):
+        return jsonify({"error": "Erro Supabase", "detail": resp.text}), 500
+
+    row = resp.json()
+    token_val = (row[0] if isinstance(row, list) else row).get('token')
+    link = f"{request.host_url.rstrip('/')}/demo/{token_val}"
+    logging.info("Token gerado para %s — expira em %s", email, expires_at)
+    return jsonify({"link": link, "email": email, "expires_at": expires_at}), 201
+
+
+# ============================================================
+# LEADS — Acesso Antecipado
+# ============================================================
+@app.route("/leads", methods=["POST"])
+def save_lead():
+    import json as _json
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Dados inválidos"}), 400
+
+    required = ['nome', 'email', 'whatsapp', 'instagram']
+    for field in required:
+        if not str(data.get(field, '')).strip():
+            return jsonify({"error": f"Campo '{field}' obrigatório"}), 400
+
+    lead = {
+        "nome":          str(data.get("nome", "")).strip(),
+        "email":         str(data.get("email", "")).strip(),
+        "whatsapp":      str(data.get("whatsapp", "")).strip(),
+        "instagram":     str(data.get("instagram", "")).strip(),
+        "data_cadastro": str(data.get("data_cadastro", ""))
+    }
+
+    leads_file = os.path.join(PROJECT_ROOT, "leads.json")
+    leads = []
+    if os.path.exists(leads_file):
+        try:
+            with open(leads_file, 'r', encoding='utf-8') as f:
+                leads = _json.load(f)
+        except Exception:
+            leads = []
+
+    leads.append(lead)
+    with open(leads_file, 'w', encoding='utf-8') as f:
+        _json.dump(leads, f, ensure_ascii=False, indent=2)
+
+    logging.info("Novo lead registrado: %s <%s>", lead["nome"], lead["email"])
+    return jsonify({"status": "ok"}), 201
+
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

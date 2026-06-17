@@ -11,6 +11,34 @@
 </head>
 <body>
 
+  <!-- ========== COUNTDOWN TIMER (BARRA TOPO) ========== -->
+  <div class="countdown-section" id="countdown">
+    <div class="countdown-inner">
+      <span class="countdown-bar-label">Acesso antecipado em</span>
+      <div class="countdown-grid">
+        <div class="countdown-card">
+          <span class="countdown-value" id="cd-days">00</span>
+          <span class="countdown-label">Dias</span>
+        </div>
+        <span class="countdown-sep" aria-hidden="true">:</span>
+        <div class="countdown-card">
+          <span class="countdown-value" id="cd-hours">00</span>
+          <span class="countdown-label">Horas</span>
+        </div>
+        <span class="countdown-sep" aria-hidden="true">:</span>
+        <div class="countdown-card">
+          <span class="countdown-value" id="cd-minutes">00</span>
+          <span class="countdown-label">Min</span>
+        </div>
+        <span class="countdown-sep" aria-hidden="true">:</span>
+        <div class="countdown-card">
+          <span class="countdown-value" id="cd-seconds">00</span>
+          <span class="countdown-label">Seg</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ========== NAVIGATION ========== -->
   <nav class="navbar">
     <a href="index.html" class="nav-logo">
@@ -23,7 +51,7 @@
       <li><a href="#odds">Odd's</a></li>
       <li><a href="#hotspot">Hotspot</a></li>
       <li><a href="recursos.html">Plataforma</a></li>
-      <li><a href="/" class="nav-cta">Solicitar Acesso</a></li>
+      <li><button class="nav-cta" data-action="open-form">Solicitar Acesso</button></li>
     </ul>
     <div class="hamburger">
       <span></span>
@@ -52,9 +80,10 @@
         A primeira plataforma de inteligência de dados e análise por vídeo projetada exclusivamente para a vaquejada. Métricas de desempenho, sistema VAR, Odd's em tempo real e muito mais.
       </p>
       <div class="hero-buttons">
-        <a href="analisar.html#secao-upload" class="btn-primary">
-          <i class="fas fa-play"></i> Métricas (Análise Biomecânica)
-        </a>
+        <button class="btn-primary" data-action="open-form">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="flex-shrink:0"><path d="M8 1a5 5 0 0 0-5 5v1H2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V6a5 5 0 0 0-5-5zm3 6H5V6a3 3 0 0 1 6 0v1z" fill="currentColor"/></svg>
+          Garantir acesso antecipado
+        </button>
       </div>
     </div>
 
@@ -187,6 +216,8 @@
     </div>
   </section>
 
+  <!-- VAR SECTION: TEMPORARIAMENTE DESATIVADA - NÃO EXCLUIR -->
+  <!-- Para reativar: definir VAR_ENABLED = true em puxa-ai-site/js/main.js -->
   <!-- ========== VAR SECTION ========== -->
   <section class="section var-section" id="var">
     <div class="container">
@@ -262,6 +293,8 @@
     </div>
   </section>
 
+  <!-- /VAR SECTION -->
+
   <!-- ========== MÉTRICAS SECTION ========== -->
   <section class="section section-darker" id="metricas">
     <div class="container">
@@ -285,28 +318,28 @@
         </div>
         <div class="showcase-image fade-in-left">
           <!-- Metrics Dashboard Mockup -->
-          <div style="background: linear-gradient(135deg, #0d1f35, #1B2A4A); border-radius: 16px; padding: 2rem; border: 1px solid rgba(255,255,255,0.08);">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+          <div class="metrics-mockup" style="background: linear-gradient(135deg, #0d1f35, #1B2A4A); border-radius: 16px; padding: 2rem; border: 1px solid rgba(255,255,255,0.08);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
               <div>
                 <div style="font-family: var(--font-heading); font-weight: 700; font-size: 1rem;">Dashboard de Prova</div>
-                <div style="font-family: var(--font-tech); font-size: 0.7rem; color: var(--cinza-medio);">Etapa Final — Parque Arena Norte</div>
+                <div class="metrics-subtitle" style="font-family: var(--font-tech); font-size: 0.7rem; color: var(--cinza-medio);">Etapa Final — Parque Arena Norte</div>
               </div>
-              <div style="display: flex; gap: 0.5rem;">
+              <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
                 <span style="background: rgba(74,222,128,0.15); color: #4ade80; font-family: var(--font-tech); font-size: 0.65rem; padding: 0.2rem 0.6rem; border-radius: 4px;">AO VIVO</span>
               </div>
             </div>
             <!-- Mini metrics -->
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-bottom: 1.5rem;">
-              <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; text-align: center;">
-                <div style="font-family: var(--font-tech); font-weight: 700; font-size: 1.5rem; color: var(--laranja-ambar);">3.2s</div>
+            <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-bottom: 1.5rem;">
+              <div class="metrics-card" style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; text-align: center;">
+                <div class="metrics-value" style="font-family: var(--font-tech); font-weight: 700; font-size: 1.5rem; color: var(--laranja-ambar);">3.2s</div>
                 <div style="font-size: 0.7rem; color: var(--cinza-medio); margin-top: 0.2rem;">Tempo Médio</div>
               </div>
-              <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; text-align: center;">
-                <div style="font-family: var(--font-tech); font-weight: 700; font-size: 1.5rem; color: var(--laranja-ambar);">78%</div>
+              <div class="metrics-card" style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; text-align: center;">
+                <div class="metrics-value" style="font-family: var(--font-tech); font-weight: 700; font-size: 1.5rem; color: var(--laranja-ambar);">78%</div>
                 <div style="font-size: 0.7rem; color: var(--cinza-medio); margin-top: 0.2rem;">Taxa Sucesso</div>
               </div>
-              <div style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; text-align: center;">
-                <div style="font-family: var(--font-tech); font-weight: 700; font-size: 1.5rem; color: var(--laranja-ambar);">42km/h</div>
+              <div class="metrics-card" style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; text-align: center;">
+                <div class="metrics-value" style="font-family: var(--font-tech); font-weight: 700; font-size: 1.5rem; color: var(--laranja-ambar);">42km/h</div>
                 <div style="font-size: 0.7rem; color: var(--cinza-medio); margin-top: 0.2rem;">Vel. Máxima</div>
               </div>
             </div>
@@ -567,9 +600,10 @@
   <section class="cta-section" id="contato">
     <h2 class="fade-in">Pronto para Elevar a Vaquejada<br>a Outro Patamar?</h2>
     <p class="fade-in">Solicite acesso antecipado à plataforma e seja um dos primeiros a experimentar o futuro da análise esportiva na vaquejada.</p>
-    <a href="mailto:contato@puxa.ai" class="btn-primary fade-in">
-      <i class="fas fa-rocket"></i> Solicitar Acesso Antecipado
-    </a>
+    <button class="btn-primary fade-in" data-action="open-form">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="flex-shrink:0"><path d="M8 1a5 5 0 0 0-5 5v1H2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V6a5 5 0 0 0-5-5zm3 6H5V6a3 3 0 0 1 6 0v1z" fill="currentColor"/></svg>
+      Solicitar Acesso Antecipado
+    </button>
   </section>
 
   <!-- ========== FOOTER ========== -->
@@ -613,6 +647,110 @@
       <span class="tech-text">Puxa<span style="color: var(--laranja-ambar);">.ai</span> // Tecnologia para Vaquejada</span>
     </div>
   </footer>
+
+  <!-- ========== MODAL FORMULÁRIO: ACESSO ANTECIPADO ========== -->
+  <div class="modal-overlay" id="modal-form" role="dialog" aria-modal="true" aria-labelledby="form-dialog-title">
+    <div class="modal-box">
+      <button class="modal-close" id="modal-close" aria-label="Fechar formulário">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </button>
+
+      <div class="form-progress-bar" role="progressbar" aria-label="Progresso do formulário">
+        <div class="form-progress-fill" id="form-progress"></div>
+      </div>
+
+      <!-- Etapa 1: Nome -->
+      <div class="form-step" id="step-1">
+        <span class="form-step-label">Etapa 1 de 4</span>
+        <h2 class="form-step-title" id="form-dialog-title">Como podemos<br>te chamar?</h2>
+        <p class="form-step-subtitle">Informe seu nome completo para personalizar sua experiência.</p>
+        <input type="text" class="form-field" id="field-1" placeholder="Seu nome completo" autocomplete="name">
+        <span class="form-error-msg" id="error-1" role="alert"></span>
+        <div class="form-actions">
+          <button class="btn-form-next" type="button">
+            Continuar
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8H13M13 8L8.5 3.5M13 8L8.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Etapa 2: E-mail -->
+      <div class="form-step hidden" id="step-2">
+        <span class="form-step-label">Etapa 2 de 4</span>
+        <h2 class="form-step-title">Qual seu<br>e-mail?</h2>
+        <p class="form-step-subtitle">Usaremos para comunicações importantes sobre seu acesso.</p>
+        <input type="email" class="form-field" id="field-2" placeholder="seu@email.com" autocomplete="email" inputmode="email">
+        <span class="form-error-msg" id="error-2" role="alert"></span>
+        <div class="form-actions">
+          <button class="btn-form-back" type="button">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8H3M3 8L7.5 3.5M3 8L7.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Voltar
+          </button>
+          <button class="btn-form-next" type="button">
+            Continuar
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8H13M13 8L8.5 3.5M13 8L8.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Etapa 3: WhatsApp -->
+      <div class="form-step hidden" id="step-3">
+        <span class="form-step-label">Etapa 3 de 4</span>
+        <h2 class="form-step-title">Seu número<br>de WhatsApp</h2>
+        <p class="form-step-subtitle">Entraremos em contato por aqui quando sua conta for liberada.</p>
+        <input type="tel" class="form-field" id="field-3" placeholder="(00) 00000-0000" autocomplete="tel" inputmode="numeric">
+        <span class="form-error-msg" id="error-3" role="alert"></span>
+        <div class="form-actions">
+          <button class="btn-form-back" type="button">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8H3M3 8L7.5 3.5M3 8L7.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Voltar
+          </button>
+          <button class="btn-form-next" type="button">
+            Continuar
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8H13M13 8L8.5 3.5M13 8L8.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Etapa 4: Instagram -->
+      <div class="form-step hidden" id="step-4">
+        <span class="form-step-label">Etapa 4 de 4</span>
+        <h2 class="form-step-title">Perfil do<br>Instagram</h2>
+        <p class="form-step-subtitle">Isso agiliza a análise do seu perfil e a aprovação do acesso.</p>
+        <input type="text" class="form-field" id="field-4" placeholder="@seu.perfil" autocomplete="off">
+        <span class="form-error-msg" id="error-4" role="alert"></span>
+        <div class="form-actions">
+          <button class="btn-form-back" type="button">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8H3M3 8L7.5 3.5M3 8L7.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Voltar
+          </button>
+          <button class="btn-form-next" type="button">
+            Finalizar cadastro
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h9M7.5 4L12 8l-4.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Tela de confirmação -->
+      <div class="form-step hidden" id="step-success">
+        <div class="form-success">
+          <div class="success-icon">
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+              <path d="M7 18L14 25L29 11" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h2 class="form-step-title" style="text-align:center;font-size:1.4rem;margin-bottom:0.8rem;">Você está na lista.</h2>
+          <p>Seu perfil está em análise. Entraremos em contato pelo <span class="success-highlight">WhatsApp informado</span> assim que sua conta for liberada. Bem-vindo ao futuro da vaquejada.</p>
+          <button class="btn-primary" id="success-close" type="button" style="margin-top:1.5rem;width:100%;justify-content:center;">
+            Voltar à página principal
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
 
   <script type="module" src="puxa-ai-site/js/main.js"></script>
 </body>

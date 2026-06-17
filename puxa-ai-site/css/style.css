@@ -150,6 +150,12 @@ html {
   box-shadow: 0 4px 15px rgba(var(--laranja-ambar-rgb), 0.4);
 }
 
+button.nav-cta {
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-heading);
+}
+
 .hamburger {
   display: none;
   flex-direction: column;
@@ -1168,8 +1174,8 @@ html {
     left: 1rem;
     right: 1rem;
     top: 0.5rem;
-    bottom: 0.5rem;
-    border-radius: 24px;
+    bottom: 0;
+    border-radius: 24px 24px 0 0;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.08);
   }
 
@@ -1177,8 +1183,8 @@ html {
     left: 1rem;
     right: 1rem;
     top: 0.5rem;
-    bottom: 0.5rem;
-    border-radius: 24px;
+    bottom: 0;
+    border-radius: 24px 24px 0 0;
   }
 
   .hero-bg-image {
@@ -1266,6 +1272,25 @@ html {
 
   .section {
     padding: 4rem 1.5rem;
+  }
+
+  .metrics-mockup {
+    padding: 1.2rem !important;
+  }
+
+  .metrics-card {
+    padding: 0.6rem !important;
+  }
+
+  .metrics-value {
+    font-size: 1.1rem !important;
+  }
+
+  .metrics-subtitle {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
   }
 
   .odds-table th,
@@ -1443,4 +1468,366 @@ html {
   color: rgba(255, 255, 255, 0.6);
   font-size: 0.9rem;
   line-height: 1.7;
+}
+
+/* ============================================
+   COUNTDOWN TIMER — BARRA TOPO
+   ============================================ */
+
+.countdown-section {
+  background: #0d1f35;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding: 0.45rem 2rem;
+  text-align: center;
+  position: relative;
+  z-index: 1001;
+}
+
+.countdown-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.countdown-bar-label {
+  font-family: var(--font-tech);
+  font-size: 0.65rem;
+  color: var(--cinza-medio);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  white-space: nowrap;
+}
+
+.countdown-grid {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.countdown-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  padding: 0.25rem 0.55rem;
+  min-width: 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.countdown-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1.5px;
+  background: var(--laranja-ambar);
+  border-radius: 1px 1px 0 0;
+}
+
+.countdown-value {
+  font-family: var(--font-tech);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--branco);
+  line-height: 1;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+  display: block;
+}
+
+.countdown-value.flip {
+  transform: translateY(-6px);
+  opacity: 0;
+}
+
+.countdown-label {
+  font-family: var(--font-tech);
+  font-size: 0.5rem;
+  color: var(--cinza-medio);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.countdown-sep {
+  font-family: var(--font-tech);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--laranja-ambar);
+  padding-bottom: 0.65rem;
+  user-select: none;
+}
+
+.countdown-done {
+  font-family: var(--font-tech);
+  font-size: 0.75rem;
+  color: var(--laranja-ambar);
+  letter-spacing: 1px;
+}
+
+@media (max-width: 480px) {
+  .countdown-bar-label {
+    display: none;
+  }
+  .countdown-card {
+    min-width: 34px;
+    padding: 0.2rem 0.4rem;
+  }
+  .countdown-value {
+    font-size: 0.9rem;
+  }
+}
+
+/* ============================================
+   MODAL — FORMULÁRIO MULTI-STEP
+   ============================================ */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(11, 18, 35, 0.92);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.modal-box {
+  background: #111c30;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  width: 100%;
+  max-width: 480px;
+  padding: 2.5rem 2.5rem 2rem;
+  position: relative;
+  overflow: hidden;
+  transform: translateY(20px);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.modal-overlay.open .modal-box {
+  transform: translateY(0);
+}
+
+.modal-close {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  background: rgba(255, 255, 255, 0.07);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  color: var(--cinza-medio);
+  flex-shrink: 0;
+}
+
+.modal-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--branco);
+}
+
+.form-progress-bar {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  margin-bottom: 2.5rem;
+  overflow: hidden;
+}
+
+.form-progress-fill {
+  height: 100%;
+  background: var(--laranja-ambar);
+  border-radius: 2px;
+  width: 25%;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-step {
+  transition: opacity 0.2s ease;
+}
+
+.form-step.hidden {
+  display: none;
+}
+
+.form-step-label {
+  font-family: var(--font-tech);
+  font-size: 0.72rem;
+  color: var(--laranja-ambar);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 0.6rem;
+  display: block;
+}
+
+.form-step-title {
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.65rem;
+  margin-bottom: 0.5rem;
+  color: var(--branco);
+  line-height: 1.2;
+}
+
+.form-step-subtitle {
+  font-size: 0.9rem;
+  color: var(--cinza-medio);
+  margin-bottom: 1.8rem;
+  line-height: 1.55;
+}
+
+.form-field {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--branco);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 0.4rem;
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+}
+
+.form-field::placeholder {
+  color: rgba(255, 255, 255, 0.28);
+}
+
+.form-field:focus {
+  border-color: var(--laranja-ambar);
+  box-shadow: 0 0 0 3px rgba(232, 114, 42, 0.14);
+}
+
+.form-field.error {
+  border-color: #f87171;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.13);
+}
+
+.form-error-msg {
+  font-size: 0.8rem;
+  color: #f87171;
+  min-height: 1.3em;
+  display: block;
+  margin-bottom: 0.8rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+
+.btn-form-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--cinza-medio);
+  padding: 0.85rem 1.2rem;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.88rem;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.btn-form-back:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--branco);
+}
+
+.btn-form-next {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: var(--laranja-ambar);
+  color: var(--branco);
+  padding: 0.9rem 1.5rem;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.btn-form-next:hover {
+  background: #d4631f;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(232, 114, 42, 0.35);
+}
+
+/* === TELA DE CONFIRMAÇÃO === */
+
+.form-success {
+  text-align: center;
+  padding: 0.5rem 0 0.5rem;
+}
+
+.success-icon {
+  width: 72px;
+  height: 72px;
+  background: rgba(74, 222, 128, 0.1);
+  border: 2px solid rgba(74, 222, 128, 0.25);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+
+.form-success p {
+  font-size: 0.95rem;
+  color: var(--cinza-medio);
+  line-height: 1.65;
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.success-highlight {
+  color: #4ade80;
+  font-weight: 600;
+}
+
+@media (max-width: 520px) {
+  .modal-box {
+    padding: 2rem 1.5rem 1.5rem;
+    border-radius: 16px;
+  }
+  .form-step-title {
+    font-size: 1.4rem;
+  }
 }
