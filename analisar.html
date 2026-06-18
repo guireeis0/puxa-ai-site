@@ -326,6 +326,83 @@
 
   </main>
 
+  <!-- ========== MODAL FEEDBACK ========== -->
+  <div id="feedbackModal" style="
+    display:none;position:fixed;inset:0;z-index:9999;
+    background:rgba(5,10,25,0.85);backdrop-filter:blur(6px);
+    align-items:center;justify-content:center;">
+    <div style="
+      background:linear-gradient(145deg,#0d1b3e,#0a1628);
+      border:1px solid rgba(46,91,186,0.35);
+      border-radius:20px;padding:36px 32px;max-width:420px;width:90%;
+      box-shadow:0 24px 80px rgba(0,0,0,0.6);
+      text-align:center;position:relative;">
+
+      <button onclick="closeFeedbackModal()" style="
+        position:absolute;top:14px;right:16px;
+        background:none;border:none;color:rgba(255,255,255,0.3);
+        font-size:18px;cursor:pointer;line-height:1;">&times;</button>
+
+      <!-- Formulário -->
+      <div id="fbForm">
+        <div style="
+          width:48px;height:48px;border-radius:50%;margin:0 auto 16px;
+          background:linear-gradient(135deg,#E8722A,#c45e1a);
+          display:flex;align-items:center;justify-content:center;
+          box-shadow:0 6px 20px rgba(232,114,42,0.35);">
+          <i class="fas fa-star" style="font-size:18px;color:#fff;"></i>
+        </div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;
+          letter-spacing:2px;text-transform:uppercase;color:#E8722A;margin-bottom:10px;">
+          Avalie sua experiência
+        </div>
+        <h3 style="font-family:'Montserrat',sans-serif;font-size:18px;font-weight:800;
+          color:#fff;margin:0 0 6px;">O que achou da análise?</h3>
+        <p style="font-family:'Inter',sans-serif;font-size:13px;color:rgba(255,255,255,0.5);
+          margin:0 0 20px;">Sua opinião vai direto para a equipe Puxa.ai</p>
+
+        <div style="display:flex;justify-content:center;gap:10px;margin-bottom:20px;">
+          <i class="fas fa-star fb-star" onclick="setFeedbackStar(1)" style="font-size:28px;color:rgba(255,255,255,0.2);cursor:pointer;transition:color .15s;"></i>
+          <i class="fas fa-star fb-star" onclick="setFeedbackStar(2)" style="font-size:28px;color:rgba(255,255,255,0.2);cursor:pointer;transition:color .15s;"></i>
+          <i class="fas fa-star fb-star" onclick="setFeedbackStar(3)" style="font-size:28px;color:rgba(255,255,255,0.2);cursor:pointer;transition:color .15s;"></i>
+          <i class="fas fa-star fb-star" onclick="setFeedbackStar(4)" style="font-size:28px;color:rgba(255,255,255,0.2);cursor:pointer;transition:color .15s;"></i>
+          <i class="fas fa-star fb-star" onclick="setFeedbackStar(5)" style="font-size:28px;color:rgba(255,255,255,0.2);cursor:pointer;transition:color .15s;"></i>
+        </div>
+
+        <textarea id="fbMensagem" placeholder="Deixe um comentário (opcional)..." style="
+          width:100%;box-sizing:border-box;background:rgba(255,255,255,0.05);
+          border:1px solid rgba(255,255,255,0.1);border-radius:10px;
+          color:#fff;font-family:'Inter',sans-serif;font-size:13px;
+          padding:12px;resize:none;height:80px;outline:none;
+          margin-bottom:16px;"></textarea>
+
+        <button id="fbSubmitBtn" onclick="submitFeedback()" style="
+          width:100%;background:linear-gradient(135deg,#E8722A,#c45e1a);
+          border:none;border-radius:10px;padding:13px;
+          font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;
+          color:#fff;cursor:pointer;box-shadow:0 6px 20px rgba(232,114,42,0.35);">
+          <i class="fas fa-paper-plane" style="margin-right:8px;"></i>Enviar avaliação
+        </button>
+      </div>
+
+      <!-- Sucesso -->
+      <div id="fbSuccess" style="display:none;flex-direction:column;align-items:center;gap:12px;padding:16px 0;">
+        <div style="width:56px;height:56px;border-radius:50%;
+          background:rgba(74,222,128,0.15);border:2px solid #4ade80;
+          display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-check" style="font-size:22px;color:#4ade80;"></i>
+        </div>
+        <p style="font-family:'Montserrat',sans-serif;font-size:16px;font-weight:700;color:#fff;margin:0;">
+          Obrigado pelo feedback!
+        </p>
+        <p style="font-family:'Inter',sans-serif;font-size:13px;color:rgba(255,255,255,0.5);margin:0;">
+          Sua opinião é muito importante para nós.
+        </p>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ========== TOAST CONTAINER ========== -->
   <div class="toast-container" id="toastContainer"></div>
 

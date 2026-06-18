@@ -262,8 +262,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // === DASHBOARD ===
-  let speedChart = null;
-  let accelChart = null;
+  let speedChart   = null;
+  let accelChart   = null;
+  let jerkChart    = null;
+  let fatigueChart = null;
+  let distChart    = null;
+  let phasesChart  = null;
 
   function showDashboard(data) {
     const r  = data.result || {};
@@ -292,6 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ).join("");
 
     showStage("Dashboard");
+    setTimeout(() => showFeedbackModal(), 8000);
 
     if (dl.metrics_csv) {
       fetch(`${API_BASE}${dl.metrics_csv}`)
@@ -416,6 +421,65 @@ document.addEventListener("DOMContentLoaded", () => {
       return slice.reduce((a, b) => a + b, 0) / slice.length;
     });
 
+    // ── Novas métricas calculadas do CSV ──
+    const n = speeds.length;
+    const mean = speeds.reduce((a, b) => a + b, 0) / n;
+    const std  = Math.sqrt(speeds.map(s => (s - mean) ** 2).reduce((a, b) => a + b, 0) / n);
+    const regularity = Math.max(0, Math.min(100, 100 - (std / (mean || 1)) * 100)).toFixed(1);
+
+    const maxSpeedVal = Math.max(...speeds);
+    const maxIdx      = speeds.indexOf(maxSpeedVal);
+    const timeToMax   = parseFloat(times[maxIdx] || 0).toFixed(1);
+
+    const half  = Math.floor(n / 2);
+    const avg1  = speeds.slice(0, half).reduce((a, b) => a + b, 0) / (half || 1);
+    const avg2  = speeds.slice(half).reduce((a, b) => a + b, 0) / ((n - half) || 1);
+    const delta = (avg1 - avg2).toFixed(1);
+
+    const elReg   = document.getElementById("dashRegularity");
+    const elTtM   = document.getElementById("dashTimeToMax");
+    const elDelta = document.getElementById("dashFatigueDelta");
+    if (elReg)   elReg.textContent   = regularity;
+    if (elTtM)   elTtM.textContent   = timeToMax;
+    if (elDelta) elDelta.textContent = delta;
+
+    // ── Distância cumulativa (para curva de fadiga) ──
+    const distances = [0];
+    for (let i = 1; i < n; i++) {
+      const dt = parseFloat(times[i]) - parseFloat(times[i - 1]);
+      distances.push(distances[i - 1] + (speeds[i - 1] / 3.6) * Math.max(0, dt));
+    }
+    const distLabels = distances.map(d => d.toFixed(1));
+
+    // ── Jerk (derivada da aceleração suavizada) ──
+    const accelSm = smooth(accels, 7);
+    const jerk = accelSm.map((a, i) => {
+      if (i === 0) return 0;
+      const dt = parseFloat(times[i]) - parseFloat(times[i - 1]);
+      return dt > 0 ? (accelSm[i] - accelSm[i - 1]) / dt : 0;
+    });
+
+    // ── Distribuição de velocidade (histograma) ──
+    const bucketSize = 5;
+    const maxBucket  = Math.ceil(maxSpeedVal / bucketSize) * bucketSize;
+    const numBuckets = Math.max(1, maxBucket / bucketSize);
+    const counts     = Array(numBuckets).fill(0);
+    speeds.forEach(s => {
+      const i = Math.min(Math.floor(s / bucketSize), numBuckets - 1);
+      counts[i]++;
+    });
+    const distBucketLabels = Array.from({ length: numBuckets }, (_, i) => `${i * bucketSize}–${(i + 1) * bucketSize}`);
+    const pcts = counts.map(c => ((c / n) * 100).toFixed(1));
+
+    // ── Velocidade média por fase ──
+    const third  = Math.floor(n / 3);
+    const pAvg   = arr => (arr.reduce((a, b) => a + b, 0) / (arr.length || 1)).toFixed(1);
+    const phaseAvgs = [
+      parseFloat(pAvg(speeds.slice(0, third))),
+      parseFloat(pAvg(speeds.slice(third, third * 2))),
+      parseFloat(pAvg(speeds.slice(third * 2))),
+    ];
+
     const base = {
       responsive: true,
       animation: { duration: 600 },
@@ -445,12 +509,122 @@ document.addEventListener("DOMContentLoaded", () => {
       },
       options: { ...base, scales: { ...base.scales, y: { ...base.scales.y, title: { display: true, text: "m/s²", color: "#9CA3AF" } } } }
     });
+
+    // ── Jerk ──
+    if (jerkChart) jerkChart.destroy();
+    jerkChart = new Chart(document.getElementById("chartJerk"), {
+      type: "line",
+      data: {
+        labels: times,
+        datasets: [{ data: smooth(jerk, 12), borderColor: "#A855F7", backgroundColor: "rgba(168,85,247,0.07)", fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 }]
+      },
+      options: { ...base, scales: { ...base.scales, y: { ...base.scales.y, title: { display: true, text: "m/s³", color: "#9CA3AF" } } } }
+    });
+
+    // ── Curva de Fadiga ──
+    if (fatigueChart) fatigueChart.destroy();
+    fatigueChart = new Chart(document.getElementById("chartFatigue"), {
+      type: "line",
+      data: {
+        labels: distLabels,
+        datasets: [{ data: smooth(speeds, 9), borderColor: "#E8722A", backgroundColor: "rgba(232,114,42,0.08)", fill: true, tension: 0.4, pointRadius: 0, borderWidth: 2 }]
+      },
+      options: { ...base, scales: {
+        x: { ...base.scales.x, title: { display: true, text: "Distância (m)", color: "#9CA3AF" }, ticks: { ...base.scales.x.ticks, maxTicksLimit: 8 } },
+        y: { ...base.scales.y, title: { display: true, text: "km/h", color: "#9CA3AF" } }
+      }}
+    });
+
+    // ── Distribuição de Velocidade ──
+    if (distChart) distChart.destroy();
+    distChart = new Chart(document.getElementById("chartDist"), {
+      type: "bar",
+      data: {
+        labels: distBucketLabels,
+        datasets: [{
+          data: pcts,
+          backgroundColor: distBucketLabels.map((_, i) => `hsla(${200 + i * 10}, 80%, 60%, 0.7)`),
+          borderColor:     distBucketLabels.map((_, i) => `hsla(${200 + i * 10}, 80%, 60%, 1)`),
+          borderWidth: 1, borderRadius: 4
+        }]
+      },
+      options: { ...base, scales: {
+        x: { ...base.scales.x, title: { display: true, text: "Faixa (km/h)", color: "#9CA3AF" } },
+        y: { ...base.scales.y, title: { display: true, text: "% do tempo", color: "#9CA3AF" } }
+      }}
+    });
+
+    // ── Velocidade por Fase ──
+    if (phasesChart) phasesChart.destroy();
+    phasesChart = new Chart(document.getElementById("chartPhases"), {
+      type: "bar",
+      data: {
+        labels: ["Arrancada (1ª fase)", "Desenvolvimento (2ª fase)", "Final (3ª fase)"],
+        datasets: [{
+          data: phaseAvgs,
+          backgroundColor: ["rgba(59,130,246,0.7)", "rgba(16,185,129,0.7)", "rgba(232,114,42,0.7)"],
+          borderColor:     ["#3B82F6", "#10B981", "#E8722A"],
+          borderWidth: 1, borderRadius: 6
+        }]
+      },
+      options: { ...base, indexAxis: "y", scales: {
+        x: { ...base.scales.x, title: { display: true, text: "km/h", color: "#9CA3AF" } },
+        y: { ...base.scales.y }
+      }}
+    });
   }
+
+  // === FEEDBACK MODAL ===
+  function showFeedbackModal() {
+    const el = document.getElementById("feedbackModal");
+    if (el) el.style.display = "flex";
+  }
+
+  window._feedbackStars = 0;
+
+  window.setFeedbackStar = function(n) {
+    window._feedbackStars = n;
+    document.querySelectorAll(".fb-star").forEach((s, i) => {
+      s.style.color = i < n ? "#E8722A" : "rgba(255,255,255,0.2)";
+    });
+  };
+
+  window.closeFeedbackModal = function() {
+    const el = document.getElementById("feedbackModal");
+    if (el) el.style.display = "none";
+  };
+
+  window.submitFeedback = async function() {
+    const stars = window._feedbackStars;
+    const msg   = document.getElementById("fbMensagem").value.trim();
+    const token = new URLSearchParams(window.location.search).get("token") || "";
+
+    if (!stars) { alert("Selecione quantas estrelas!"); return; }
+
+    const btn = document.getElementById("fbSubmitBtn");
+    btn.disabled = true;
+    btn.textContent = "Enviando...";
+
+    try {
+      await fetch(`${API_BASE}/feedback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estrelas: stars, mensagem: msg, token })
+      });
+      document.getElementById("fbForm").style.display = "none";
+      document.getElementById("fbSuccess").style.display = "flex";
+      setTimeout(() => closeFeedbackModal(), 2500);
+    } catch {
+      btn.disabled = false;
+      btn.textContent = "Enviar";
+      alert("Erro ao enviar. Tente novamente.");
+    }
+  };
 
   // === NOVA ANÁLISE ===
   btnNewAnalysis.addEventListener("click", () => {
-    if (speedChart) { speedChart.destroy(); speedChart = null; }
-    if (accelChart) { accelChart.destroy(); accelChart = null; }
+    [speedChart, accelChart, jerkChart, fatigueChart, distChart, phasesChart].forEach(c => { if (c) c.destroy(); });
+    speedChart = accelChart = jerkChart = fatigueChart = distChart = phasesChart = null;
     fileInput.value = "";
     showStage("Upload");
   });
