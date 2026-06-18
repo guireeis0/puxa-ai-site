@@ -286,8 +286,6 @@ document.addEventListener("DOMContentLoaded", () => {
       { key: "report_pdf",  icon: "fa-file-pdf",   label: "Relatório PDF" },
       { key: "video",       icon: "fa-video",       label: "Vídeo Resultado" },
       { key: "graph_png",   icon: "fa-image",       label: "Gráfico PNG" },
-      { key: "metrics_csv", icon: "fa-table",       label: "Métricas CSV" },
-      { key: "summary_csv", icon: "fa-list",        label: "Resumo CSV" },
       { key: "share_card",  icon: "fa-horse",       label: "Card Cavalo PNG" },
     ];
     const dlBtns = document.getElementById("dashDlBtns");
