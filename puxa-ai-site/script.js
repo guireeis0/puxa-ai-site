@@ -283,17 +283,29 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("dashAiAnalysis").innerHTML     = r.ai_analysis || "Análise biomecânica concluída.";
 
     const dlMap = [
-      { key: "report_pdf",  icon: "fa-file-pdf", label: "Relatório PDF" },
-      { key: "video",       icon: "fa-video",    label: "Vídeo Resultado" },
-      { key: "graph_png",   icon: "fa-image",    label: "Gráfico PNG" },
-      { key: "metrics_csv", icon: "fa-table",    label: "Métricas CSV" },
-      { key: "summary_csv", icon: "fa-list",     label: "Resumo CSV" },
+      { key: "report_pdf",  icon: "fa-file-pdf",   label: "Relatório PDF" },
+      { key: "video",       icon: "fa-video",       label: "Vídeo Resultado" },
+      { key: "graph_png",   icon: "fa-image",       label: "Gráfico PNG" },
+      { key: "metrics_csv", icon: "fa-table",       label: "Métricas CSV" },
+      { key: "summary_csv", icon: "fa-list",        label: "Resumo CSV" },
+      { key: "share_card",  icon: "fa-horse",       label: "Card Cavalo PNG" },
     ];
-    document.getElementById("dashDlBtns").innerHTML = dlMap.filter(d => dl[d.key]).map(d =>
-      `<a class="dash-dl-btn" href="${API_BASE}${dl[d.key]}" target="_blank">
+    const dlBtns = document.getElementById("dashDlBtns");
+    dlBtns.innerHTML = dlMap.filter(d => dl[d.key]).map(d =>
+      `<a class="dash-dl-btn" href="${API_BASE}${dl[d.key]}" download target="_blank">
          <i class="fas ${d.icon}"></i> ${d.label}
        </a>`
     ).join("");
+
+    const metricsBtn = document.createElement('button');
+    metricsBtn.className = 'dash-dl-btn';
+    metricsBtn.style.cursor = 'pointer';
+    metricsBtn.style.background = 'rgba(232,114,42,0.08)';
+    metricsBtn.style.borderColor = 'rgba(232,114,42,0.3)';
+    metricsBtn.style.color = '#E8722A';
+    metricsBtn.innerHTML = '<i class="fas fa-share-alt"></i> Card Métricas PNG';
+    metricsBtn.onclick = downloadMetricsCard;
+    dlBtns.appendChild(metricsBtn);
 
     showStage("Dashboard");
     setTimeout(() => showFeedbackModal(), 13000);
@@ -571,6 +583,67 @@ document.addEventListener("DOMContentLoaded", () => {
         x: { ...base.scales.x, title: { display: true, text: "km/h", color: "#9CA3AF" } },
         y: { ...base.scales.y }
       }}
+    });
+  }
+
+  // === CARD MÉTRICAS PNG (Canvas) ===
+  function downloadMetricsCard() {
+    const W = 1080, H = 680;
+    const canvas = document.createElement('canvas');
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#0d1f35';
+    ctx.fillRect(0, 0, W, H);
+
+    ctx.fillStyle = '#E8722A';
+    ctx.fillRect(0, 0, W, 6);
+
+    ctx.font = 'bold 54px Montserrat, Arial';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText('Puxa', 60, 82);
+    const bw = ctx.measureText('Puxa').width;
+    ctx.fillStyle = '#E8722A';
+    ctx.fillText('.ai', 60 + bw, 82);
+
+    const get = id => document.getElementById(id)?.textContent ?? '—';
+    const metrics = [
+      ['VEL. MÁXIMA',  get('dashMaxSpeed'),   'km/h'],
+      ['VEL. MÉDIA',   get('dashAvgSpeed'),    'km/h'],
+      ['DISTÂNCIA',    get('dashDistance'),    'm'],
+      ['TEMPO',        get('dashRunTime'),     's'],
+      ['ARRANCADA',    get('dashMaxAccel'),    'm/s²'],
+      ['EFICIÊNCIA',   get('dashEfficiency'),  '%'],
+    ];
+
+    const cols = 3, colW = W / cols, startY = 160;
+    metrics.forEach(([label, val, unit], i) => {
+      const x = (i % cols) * colW + 60;
+      const y = startY + Math.floor(i / cols) * 200;
+
+      ctx.font = '600 18px Inter, Arial';
+      ctx.fillStyle = '#9CA3AF';
+      ctx.fillText(label, x, y);
+
+      ctx.font = 'bold 64px Montserrat, Arial';
+      ctx.fillStyle = '#FFFFFF';
+      ctx.fillText(val, x, y + 74);
+
+      const vw = ctx.measureText(val).width;
+      ctx.font = '600 22px Inter, Arial';
+      ctx.fillStyle = '#E8722A';
+      ctx.fillText(unit, x + vw + 10, y + 64);
+    });
+
+    ctx.font = '400 22px Inter, Arial';
+    ctx.fillStyle = '#4B5563';
+    ctx.fillText('puxaai.com', 60, H - 28);
+
+    canvas.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'puxa-ai-metricas.png';
+      a.click();
     });
   }
 
