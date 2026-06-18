@@ -47,9 +47,8 @@ body {
 }
 
 /* === SCROLLBAR === */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--azul-marinho-deep); }
-::-webkit-scrollbar-thumb { background: var(--laranja-ambar); border-radius: 3px; }
+::-webkit-scrollbar { width: 0; }
+html { scrollbar-width: none; }
 
 /* === NAVBAR === */
 .navbar {
