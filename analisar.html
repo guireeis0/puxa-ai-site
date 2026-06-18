@@ -19,6 +19,10 @@
         if (!r.ok) { window.location.href = '/?acesso=expirado'; return; }
       } catch { window.location.href = '/?acesso=erro'; return; }
       document.documentElement.style.visibility = 'visible';
+      document.addEventListener('DOMContentLoaded', () => {
+        const m = document.getElementById('betaModal');
+        if (m) m.style.display = 'flex';
+      });
     })();
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,6 +32,54 @@
   <link rel="stylesheet" href="puxa-ai-site/style2.css">
 </head>
 <body>
+
+  <!-- ========== MODAL BETA ========== -->
+  <div id="betaModal" style="
+    display:none;position:fixed;inset:0;z-index:9999;
+    background:rgba(5,10,25,0.85);backdrop-filter:blur(6px);
+    align-items:center;justify-content:center;">
+    <div style="
+      background:linear-gradient(145deg,#0d1b3e,#0a1628);
+      border:1px solid rgba(46,91,186,0.4);
+      border-radius:20px;padding:40px 36px;max-width:460px;width:90%;
+      box-shadow:0 24px 80px rgba(0,0,0,0.6),0 0 0 1px rgba(232,114,42,0.15);
+      text-align:center;position:relative;">
+      <div style="
+        width:56px;height:56px;border-radius:50%;margin:0 auto 20px;
+        background:linear-gradient(135deg,#E8722A,#c45e1a);
+        display:flex;align-items:center;justify-content:center;
+        box-shadow:0 8px 24px rgba(232,114,42,0.35);">
+        <i class="fas fa-flask" style="font-size:22px;color:#fff;"></i>
+      </div>
+      <div style="
+        font-family:'Space Mono',monospace;font-size:10px;font-weight:700;
+        letter-spacing:2px;text-transform:uppercase;color:#E8722A;margin-bottom:12px;">
+        Acesso Exclusivo Beta
+      </div>
+      <h2 style="
+        font-family:'Montserrat',sans-serif;font-size:22px;font-weight:800;
+        color:#fff;margin:0 0 14px;line-height:1.3;">
+        Você está testando a Puxa.ai
+      </h2>
+      <p style="
+        font-family:'Inter',sans-serif;font-size:14px;color:rgba(255,255,255,0.65);
+        line-height:1.7;margin:0 0 28px;">
+        Este é um teste exclusivo da nossa ferramenta de <strong style="color:rgba(255,255,255,0.9);">análise biomecânica por IA</strong>.
+        Seu feedback é essencial para o lançamento oficial — use à vontade e nos conte o que achar.
+      </p>
+      <button onclick="document.getElementById('betaModal').style.display='none'" style="
+        background:linear-gradient(135deg,#E8722A,#c45e1a);
+        border:none;border-radius:10px;padding:14px 32px;
+        font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;
+        color:#fff;cursor:pointer;letter-spacing:.5px;
+        box-shadow:0 6px 20px rgba(232,114,42,0.4);
+        transition:transform .15s,box-shadow .15s;"
+        onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 28px rgba(232,114,42,0.5)'"
+        onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(232,114,42,0.4)'">
+        <i class="fas fa-arrow-right" style="margin-right:8px;"></i>Começar Análise
+      </button>
+    </div>
+  </div>
 
   <!-- ========== NAVBAR ========== -->
   <nav class="navbar">
