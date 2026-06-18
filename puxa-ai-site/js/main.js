@@ -3,7 +3,7 @@
    ============================================ */
 
 // === CONFIGURAÇÃO GLOBAL ===
-const VAR_ENABLED = false; // Alterar para true para reativar a seção do VAR
+const VAR_ENABLED = true;
 const DEMO_TARGET_DATE = new Date('2026-08-01T00:00:00'); // Data-alvo da demo (configurável)
 
 // === SUPABASE ===
