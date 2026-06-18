@@ -1209,145 +1209,37 @@ html { scrollbar-width: none; }
   .queue-list {
     max-height: 400px;
   }
-  .dash-metrics {
-    grid-template-columns: repeat(3, 1fr);
-  }
 }
 
 @media (max-width: 768px) {
-  /* Navbar */
   .navbar {
-    padding: 0.75rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.8rem 1rem;
   }
-  .nav-title { display: none; }
-
-  /* Upload hero */
-  .upload-hero-title {
-    font-size: 1.5rem;
+  .nav-title {
+    display: none;
   }
-  .upload-hero-sub {
-    font-size: 0.82rem;
-  }
-
-  /* Drop zone */
   .drop-zone {
     padding: 2rem 1rem;
   }
   .drop-icon {
-    width: 56px;
-    height: 56px;
-    font-size: 1.5rem;
+    width: 60px;
+    height: 60px;
+    font-size: 1.6rem;
   }
   .drop-formats {
     gap: 0.3rem;
-    flex-wrap: wrap;
-    justify-content: center;
   }
-
-  /* Processing card */
-  .proc-card {
-    padding: 1rem;
+  .file-card {
+    padding: 0.8rem;
   }
-
-  /* Dashboard */
-  .dashboard-inline {
-    padding: 0 0.5rem;
-  }
-  .dashboard-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-    padding: 1rem;
-  }
-  .btn-new-analysis {
-    width: 100%;
-    justify-content: center;
-  }
-  .dashboard-body {
-    padding: 1rem;
-    gap: 1rem;
-  }
-  .dash-metrics {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.5rem;
-  }
-  .dash-metric-value {
-    font-size: 1.3rem;
-  }
-  .dash-charts {
-    grid-template-columns: 1fr;
-  }
-  .dash-bottom {
-    grid-template-columns: 1fr;
-  }
-  .dash-dl-btns {
-    flex-direction: row;
-    flex-wrap: wrap;
-    min-width: unset;
-  }
-
-  /* File card */
-  .file-card { padding: 0.8rem; }
   .file-icon {
     width: 40px;
     height: 40px;
     font-size: 1.1rem;
   }
-  .action-buttons { flex-direction: column; }
-
-  /* Toast */
-  .toast-container {
-    left: 1rem;
-    right: 1rem;
-    bottom: 1rem;
-  }
-  .toast {
-    min-width: unset;
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  html { font-size: 14px; }
-
-  .navbar {
-    padding: 0.6rem 0.75rem;
-  }
-
-  .stage-container {
-    padding: 0.75rem;
-  }
-
-  .upload-hero-title {
-    font-size: 1.25rem;
-  }
-
-  .drop-zone {
-    padding: 1.5rem 0.75rem;
-  }
-
-  .btn-select {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .dash-metrics {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .dash-metric-card {
-    padding: 0.75rem 0.5rem;
-  }
-  .dash-metric-value {
-    font-size: 1.1rem;
-  }
-  .dash-metric-label {
-    font-size: 0.6rem;
-  }
-
-  /* Modais */
-  #betaModal > div,
-  #feedbackModal > div {
-    padding: 28px 20px;
-    border-radius: 16px;
+  .action-buttons {
+    flex-direction: column;
   }
 }
