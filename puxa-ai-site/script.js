@@ -296,7 +296,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ).join("");
 
     showStage("Dashboard");
-    setTimeout(() => showFeedbackModal(), 8000);
+    setTimeout(() => showFeedbackModal(), 13000);
 
     if (dl.metrics_csv) {
       fetch(`${API_BASE}${dl.metrics_csv}`)
