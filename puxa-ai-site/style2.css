@@ -39,7 +39,7 @@ html {
 
 body {
   font-family: var(--font-body);
-  background: var(--azul-marinho);
+  background: var(--azul-marinho-deep);
   color: var(--branco);
   min-height: 100vh;
   overflow-x: hidden;
@@ -48,7 +48,7 @@ body {
 
 /* === SCROLLBAR === */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: var(--azul-marinho); }
+::-webkit-scrollbar-track { background: var(--azul-marinho-deep); }
 ::-webkit-scrollbar-thumb { background: var(--laranja-ambar); border-radius: 3px; }
 
 /* === NAVBAR === */
@@ -57,7 +57,7 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 1rem 2rem;
-  background: var(--azul-marinho);
+  background: var(--azul-marinho-deep);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -794,6 +794,132 @@ body {
 .toast.success .toast-icon { background: rgba(74, 222, 128, 0.12); color: var(--verde); }
 .toast.error .toast-icon { background: rgba(248, 113, 113, 0.12); color: var(--vermelho); }
 .toast.info .toast-icon { background: rgba(232, 114, 42, 0.12); color: var(--laranja-ambar); }
+
+/* ============================================
+   HORSE HOLOGRAM
+   ============================================ */
+
+.dash-holo-card {
+  grid-column: 1 / -1;
+}
+
+.horse-holo-wrap {
+  background: linear-gradient(135deg, #060d1a, #0a1628);
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 0.5rem 0.5rem 0.25rem;
+}
+
+.horse-holo-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Skeleton lines */
+.sk {
+  stroke: rgba(0, 229, 255, 0.55);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px rgba(0, 229, 255, 0.7));
+}
+
+.sk2 {
+  stroke: rgba(0, 229, 255, 0.18);
+  stroke-width: 1.2;
+  stroke-linecap: round;
+  stroke-dasharray: 4 4;
+}
+
+/* Keypoints */
+.kp { animation: kp-pulse 2.4s ease-in-out infinite; }
+
+.kp-c {
+  fill: #00e5ff;
+  filter: drop-shadow(0 0 4px rgba(0, 229, 255, 0.9));
+}
+
+.kp-o {
+  fill: #E8722A;
+  filter: drop-shadow(0 0 5px rgba(232, 114, 42, 0.9));
+}
+
+.kp-d {
+  fill: rgba(0, 229, 255, 0.28);
+}
+
+.kp-jarrete {
+  animation: jarrete-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes kp-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1);    }
+  50%       { opacity: 0.6; transform: scale(1.25); }
+}
+
+@keyframes jarrete-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1);    filter: drop-shadow(0 0 5px rgba(232,114,42,0.9)); }
+  50%       { opacity: 0.8; transform: scale(1.4);  filter: drop-shadow(0 0 12px rgba(232,114,42,1));  }
+}
+
+/* Leader lines */
+.lk { stroke-width: 1; stroke-linecap: round; }
+.lk-c { stroke: rgba(0, 229, 255, 0.4); }
+.lk-o { stroke: rgba(232, 114, 42, 0.6); stroke-width: 1.5; }
+
+/* Label text */
+.lt {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  fill: rgba(0, 229, 255, 0.78);
+  letter-spacing: 0.4px;
+}
+
+.lt-o {
+  fill: #E8722A;
+  font-weight: 700;
+  font-size: 9.5px;
+}
+
+/* Scan line */
+.holo-scan {
+  animation: scan-sweep 5s linear infinite;
+}
+
+@keyframes scan-sweep {
+  0%   { transform: translateY(-45px); }
+  100% { transform: translateY(335px); }
+}
+
+/* Legend */
+.holo-legend {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 0.6rem 0 0.4rem;
+}
+
+.holo-leg-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: 'Space Mono', monospace;
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.holo-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.hd-c { background: #00e5ff; box-shadow: 0 0 6px rgba(0,229,255,0.8); }
+.hd-o { background: #E8722A; box-shadow: 0 0 6px rgba(232,114,42,0.8); }
+.hd-d { background: rgba(0, 229, 255, 0.28); }
 
 .toast-content {
   flex: 1;
