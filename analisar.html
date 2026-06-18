@@ -19,10 +19,9 @@
         if (!r.ok) { window.location.href = '/?acesso=expirado'; return; }
       } catch { window.location.href = '/?acesso=erro'; return; }
       document.documentElement.style.visibility = 'visible';
-      document.addEventListener('DOMContentLoaded', () => {
-        const m = document.getElementById('betaModal');
-        if (m) m.style.display = 'flex';
-      });
+      const showBeta = () => { const m = document.getElementById('betaModal'); if (m) m.style.display = 'flex'; };
+      if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', showBeta);
+      else showBeta();
     })();
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
