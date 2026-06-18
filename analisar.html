@@ -4,6 +4,23 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Análise Biomecânica — Puxa.ai</title>
+  <script>
+    const ACCESS_RESTRICTED = true; // false = libera acesso geral no lançamento oficial
+
+    const API_BASE = 'https://guireeis0-puxa-ai-var.hf.space';
+
+    (async () => {
+      if (!ACCESS_RESTRICTED) return;
+      document.documentElement.style.visibility = 'hidden';
+      const token = new URLSearchParams(window.location.search).get('token');
+      if (!token) { window.location.href = '/?acesso=negado'; return; }
+      try {
+        const r = await fetch(`${API_BASE}/validate-token?token=${encodeURIComponent(token)}`);
+        if (!r.ok) { window.location.href = '/?acesso=expirado'; return; }
+      } catch { window.location.href = '/?acesso=erro'; return; }
+      document.documentElement.style.visibility = 'visible';
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -183,6 +200,24 @@
               <span class="dash-metric-label">Eficiência</span>
               <span class="dash-metric-unit">%</span>
             </div>
+            <div class="dash-metric-card">
+              <span class="dash-metric-icon"><i class="fas fa-wave-square"></i></span>
+              <span class="dash-metric-value" id="dashRegularity">—</span>
+              <span class="dash-metric-label">Regularidade</span>
+              <span class="dash-metric-unit">score</span>
+            </div>
+            <div class="dash-metric-card">
+              <span class="dash-metric-icon"><i class="fas fa-clock"></i></span>
+              <span class="dash-metric-value" id="dashTimeToMax">—</span>
+              <span class="dash-metric-label">Tempo até Máx.</span>
+              <span class="dash-metric-unit">seg</span>
+            </div>
+            <div class="dash-metric-card">
+              <span class="dash-metric-icon"><i class="fas fa-balance-scale"></i></span>
+              <span class="dash-metric-value" id="dashFatigueDelta">—</span>
+              <span class="dash-metric-label">Queda 1ª→2ª</span>
+              <span class="dash-metric-unit">km/h</span>
+            </div>
           </div>
 
           <div class="dash-charts">
@@ -196,6 +231,28 @@
             </div>
           </div>
 
+
+          <div class="dash-charts">
+            <div class="dash-chart-card">
+              <div class="dash-chart-title"><i class="fas fa-bolt"></i> Jerk — Variação da Aceleração</div>
+              <canvas id="chartJerk"></canvas>
+            </div>
+            <div class="dash-chart-card">
+              <div class="dash-chart-title"><i class="fas fa-road"></i> Curva de Fadiga (vel. × distância)</div>
+              <canvas id="chartFatigue"></canvas>
+            </div>
+          </div>
+
+          <div class="dash-charts">
+            <div class="dash-chart-card">
+              <div class="dash-chart-title"><i class="fas fa-chart-bar"></i> Distribuição de Velocidade</div>
+              <canvas id="chartDist"></canvas>
+            </div>
+            <div class="dash-chart-card">
+              <div class="dash-chart-title"><i class="fas fa-flag-checkered"></i> Velocidade Média por Fase</div>
+              <canvas id="chartPhases"></canvas>
+            </div>
+          </div>
 
           <div class="dash-bottom">
             <div class="dash-analysis">
