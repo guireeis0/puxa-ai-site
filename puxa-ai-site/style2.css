@@ -1218,6 +1218,10 @@ html { scrollbar-width: none; }
   /* Navbar */
   .navbar {
     padding: 0.75rem 1rem;
+    flex-wrap: nowrap;
+  }
+  .navbar img {
+    height: 40px !important;
   }
   .nav-title { display: none; }
 
@@ -1312,6 +1316,10 @@ html { scrollbar-width: none; }
 
   .navbar {
     padding: 0.6rem 0.75rem;
+    flex-wrap: nowrap;
+  }
+  .navbar img {
+    height: 34px !important;
   }
 
   .stage-container {
