@@ -2,7 +2,9 @@ import os
 import sys
 import uuid
 import logging
+import json
 import threading
+import subprocess
 import requests
 from dotenv import load_dotenv
 
@@ -25,7 +27,9 @@ from analytics import generate_report
 from report import generate_pdf_report
 from var import var_bp
 from main import process_video as process_performance
-from config import ALLOWED_EXTENSIONS, MAX_UPLOAD_BYTES
+from config import ALLOWED_EXTENSIONS, MAX_UPLOAD_BYTES, PHASE_HIGH_FRAC
+
+MIN_ACCEL_TO_REPORT = 2.0   # m/s² — abaixo disso não há arrancada/frenagem digna de nota
 from datetime import datetime, timedelta, timezone
 
 app = Flask(__name__)
@@ -119,39 +123,80 @@ def generate_ai_analysis(result: dict) -> str:
     a partir das métricas retornadas pelo process_video.
     """
     parts = []
+    speed, max_speed = result.get("avg_speed"), result.get("max_speed")
+    bio = result.get("biomecanica") or {}
+    passada = bio.get("passada") or {}
+    slow = passada.get("fator_camera_lenta")
 
-    speed     = result.get("avg_speed") or result.get("velocidade_media")
-    max_speed = result.get("max_speed") or result.get("velocidade_maxima")
-    sym       = result.get("simetria")        or result.get("symmetry_score")
-    cadence   = result.get("cadencia")        or result.get("cadence")
-    stride    = result.get("comprimento_passo") or result.get("stride_length")
-
-    if speed is not None:
-        parts.append(f"A velocidade média registrada foi de <strong>{float(speed):.1f} km/h</strong>")
-        if max_speed:
-            parts[-1] += f", com pico de <strong>{float(max_speed):.1f} km/h</strong>"
-        parts[-1] += "."
-
-    if cadence is not None:
-        parts.append(f"A cadência de passada ficou em <strong>{int(cadence)} passos/min</strong>"
-                     + (f", com comprimento médio de <strong>{float(stride):.2f} m</strong>." if stride else "."))
-
-    if sym is not None:
-        sym_val = float(sym)
-        if sym_val >= 90:
-            avaliacao = "excelente simetria bilateral"
-        elif sym_val >= 75:
-            avaliacao = "boa simetria, com leve compensação"
-        elif sym_val >= 60:
-            avaliacao = "simetria moderada — recomenda-se acompanhamento"
+    if speed:
+        if slow:
+            parts.append(f"O vídeo parece estar em câmera lenta (~{slow:.1f}×); em tempo real, a velocidade média "
+                         f"fica em torno de <strong>{speed * slow:.1f} km/h</strong> e o pico em "
+                         f"<strong>{(max_speed or 0) * slow:.1f} km/h</strong>.")
         else:
-            avaliacao = "assimetria relevante detectada — avaliação veterinária indicada"
-        parts.append(f"O índice de simetria foi de <strong>{sym_val:.1f}%</strong>, indicando <strong>{avaliacao}</strong>.")
+            parts.append(f"Velocidade média de <strong>{float(speed):.1f} km/h</strong> na corrida, com pico de "
+                         f"<strong>{float(max_speed or 0):.1f} km/h</strong> aos {result.get('time_to_max_speed', 0):.1f} s.")
+
+    fases = {f["fase"]: f for f in result.get("fases") or []}
+    arr, fre = fases.get("arrancada"), fases.get("frenagem")
+    # só comenta arrancada/frenagem quando elas existem no vídeo (largada parada, freada de verdade)
+    if arr and arr["duracao_s"] >= 1.0 and result.get("max_accel", 0) >= MIN_ACCEL_TO_REPORT:
+        parts.append(f"A arrancada levou <strong>{arr['duracao_s']:.1f} s</strong> até "
+                     f"{int(PHASE_HIGH_FRAC * 100)}% do pico, com aceleração máxima de "
+                     f"<strong>{result['max_accel']:.1f} m/s²</strong>.")
+    if fre and fre["duracao_s"] >= 1.0 and result.get("max_decel", 0) >= MIN_ACCEL_TO_REPORT:
+        parts.append(f"Na frenagem/derrubada a desaceleração chegou a <strong>{result['max_decel']:.1f} m/s²</strong>.")
+
+    if passada.get("frequencia_hz"):
+        f_real = passada["frequencia_hz"] * (slow or 1)
+        txt = f"Passada de <strong>{f_real:.2f} Hz</strong>"
+        if passada.get("comprimento_m"):
+            txt += f" e comprimento de ~<strong>{passada['comprimento_m']:.1f} m</strong>"
+        parts.append(txt + ".")
 
     if not parts:
         parts.append("Análise biomecânica concluída. Verifique os arquivos de métricas para detalhes completos.")
 
     return " ".join(parts)
+
+
+# ============================================================
+# 🦴 BIOMECÂNICA (pose) — ambiente Python separado com DeepLabCut
+# ============================================================
+# Ativada só quando BIO_PYTHON aponta para o python do ambiente de pose.
+BIO_PYTHON  = os.environ.get("BIO_PYTHON", "")
+BIO_RUNNER  = os.path.join(PROJECT_ROOT, "bio", "run_bio.py")
+BIO_TIMEOUT = int(os.environ.get("BIO_TIMEOUT_S", "1200"))
+
+def run_biomechanics(video_path, out_dir, update_msg):
+    """Roda bio/run_bio.py no ambiente de pose, repassa o progresso e devolve o bio.json (ou None)."""
+    if not BIO_PYTHON or not os.path.exists(BIO_PYTHON):
+        return None
+    bio_dir = os.path.join(out_dir, "bio")
+    os.makedirs(bio_dir, exist_ok=True)
+    cmd = [BIO_PYTHON, BIO_RUNNER, video_path, bio_dir, "--track", os.path.join(out_dir, "metrics.csv")]
+    env = {**os.environ, "PYTHONIOENCODING": "utf-8"}
+    err_log = open(os.path.join(bio_dir, "stderr.log"), "w", encoding="utf-8")
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=err_log, text=True,
+                            encoding="utf-8", errors="replace", env=env)
+    try:
+        for raw in proc.stdout:
+            msg = raw.strip()
+            if msg.startswith("[bio] frame"):
+                update_msg("IA: Biomecânica — pose " + msg[len("[bio] "):])
+            elif msg.startswith("[bio] pose ok"):
+                update_msg("IA: Biomecânica — calculando passada, mão de galope e ângulos...")
+        proc.wait(timeout=BIO_TIMEOUT)
+    finally:
+        err_log.close()
+        if proc.poll() is None:
+            proc.kill()
+    if proc.returncode != 0:
+        with open(os.path.join(bio_dir, "stderr.log"), encoding="utf-8") as f:
+            lines = [l for l in f.read().strip().splitlines() if l.strip()]
+        raise RuntimeError(lines[-1] if lines else "falha na biomecânica")
+    with open(os.path.join(bio_dir, "bio.json"), encoding="utf-8") as f:
+        return json.load(f)
 
 
 # ============================================================
@@ -171,7 +216,7 @@ def run_ai_pipeline(job_id, video_path, mode="performance"):
     }
     
     try:
-        # 1) IA processa o vídeo (YOLO + SpeedTracker)
+        # 1) IA processa o vídeo (YOLO + compensação de câmera + cinemática offline)
         result = process_performance(
             video_path, 
             job_id=job_id, 
@@ -190,10 +235,25 @@ def run_ai_pipeline(job_id, video_path, mode="performance"):
         update_msg("IA: Costurando relatório em PDF...")
         generate_pdf_report(job_id, base_output=OUTPUT_FOLDER)
 
-        # 3) Adiciona análise textual da IA ao resultado
+        # 3) Biomecânica (opcional — não derruba o job se falhar)
+        downloads_extra = {}
+        if BIO_PYTHON:
+            update_msg("IA: Biomecânica — carregando modelo de pose (39 pontos)...")
+            JOBS_STATUS[job_id]["live"] = f"/live/{job_id}"
+            try:
+                bio = run_biomechanics(video_path, os.path.join(OUTPUT_FOLDER, job_id), update_msg)
+                if bio:
+                    result["biomecanica"] = bio
+                    downloads_extra["bio_video"]     = f"/download/{job_id}/bio/biomecanica.mp4"
+                    downloads_extra["bio_keypoints"] = f"/download/{job_id}/bio/keypoints.csv"
+            except Exception as e:
+                logging.error("Biomecânica falhou no job %s: %s", job_id, e)
+                result["biomecanica_erro"] = str(e)
+
+        # 4) Análise textual (depois da biomecânica, para incluir passada e câmera lenta)
         result["ai_analysis"] = generate_ai_analysis(result)
 
-        # 4) Marca como completo para o script.js ler
+        # 5) Marca como completo para o script.js ler
         JOBS_STATUS[job_id] = {
             "status": "completed",
             "message": "IA: Análise concluída! Relatório pronto.",
@@ -204,7 +264,8 @@ def run_ai_pipeline(job_id, video_path, mode="performance"):
                 "report_pdf":  f"/download/{job_id}/performance_report.pdf",
                 "graph_png":   f"/download/{job_id}/performance_report.png",
                 "metrics_csv": f"/download/{job_id}/metrics.csv",
-                "summary_csv": f"/download/{job_id}/summary.csv"
+                "summary_csv": f"/download/{job_id}/summary.csv",
+                **downloads_extra,
             }
         }
         logging.info("Job %s finalizado com sucesso.", job_id)
@@ -221,7 +282,8 @@ def run_ai_pipeline(job_id, video_path, mode="performance"):
 # ============================================================
 @app.route("/health", methods=["GET"])
 def health_check():
-    return jsonify({"status": "ok"}), 200
+    bio_on = bool(BIO_PYTHON) and os.path.exists(BIO_PYTHON)
+    return jsonify({"status": "ok", "biomecanica": bio_on}), 200
 
 @app.route("/upload", methods=["POST"])
 def upload_video():
@@ -264,10 +326,26 @@ def var_page():
     var_html = os.path.join(PROJECT_ROOT, "var.html")
     return send_file(var_html)
 
-@app.route("/download/<job_id>/<filename>", methods=["GET"])
+@app.route("/live/<job_id>", methods=["GET"])
+def live_frame(job_id):
+    """Último frame processado pela pose, com o esqueleto (prévia ao vivo)."""
+    if job_id not in JOBS_STATUS:
+        return jsonify({"error": "Job não encontrado."}), 404
+    path = os.path.join(OUTPUT_FOLDER, job_id, "bio", "live.jpg")
+    try:
+        # lê tudo de uma vez para não segurar o arquivo aberto (no Windows isso travaria a troca do frame)
+        with open(path, "rb") as f:
+            data = f.read()
+    except OSError:
+        return ("", 204)
+    return app.response_class(data, mimetype="image/jpeg", headers={"Cache-Control": "no-store"})
+
+
+@app.route("/download/<job_id>/<path:filename>", methods=["GET"])
 def download_file(job_id, filename):
-    file_path = os.path.abspath(os.path.join(OUTPUT_FOLDER, job_id, filename))
-    if not os.path.exists(file_path):
+    job_dir   = os.path.abspath(os.path.join(OUTPUT_FOLDER, job_id))
+    file_path = os.path.abspath(os.path.join(job_dir, filename))
+    if not file_path.startswith(job_dir + os.sep) or not os.path.exists(file_path):
         return jsonify({"error": "Arquivo não encontrado"}), 404
     return send_file(file_path, as_attachment=True)
 

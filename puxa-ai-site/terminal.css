@@ -1,0 +1,205 @@
+/* ============================================
+   PUXA.AI — Terminal (analisar-terminal.html)
+   ============================================ */
+
+:root {
+  /* mesma paleta da landing (tema escuro, verde de marca) */
+  --bg:      #121212;
+  --panel:   #121212;
+  --bar:     #121212;
+  --line:    #2E2E2E;
+  --text:    #D0D0D0;
+  --dim:     #8F8F8F;
+  --faint:   #4A4A4A;
+  --accent:  #3ECF8E;             /* verde da marca: cursor, comandos, barras, destaques */
+  --accent-2: #6EE7B7;
+  --accent-soft: rgba(62,207,142,.14);
+  --info:    #A1A1A1;             /* [ .. ], caminho do prompt, chaves do JSON */
+  --green:   #3ECF8E;             /* [ ok ] */
+  --red:     #F87171;             /* [erro] */
+  --amber:   #F5B94B;             /* [warn] */
+  --white:   #FAFAFA;
+}
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', ui-monospace, 'Cascadia Code', Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+body { display: flex; padding: 0; }
+
+/* ── Janela ── */
+.term {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  max-width: 1100px;
+  margin: 0 auto;
+  background: var(--panel);
+  overflow: hidden;
+}
+
+.term-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 22px 40px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.term-body::-webkit-scrollbar { width: 8px; }
+.term-body::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
+.term-body::selection, .term-body *::selection { background: var(--accent); color: #0B0B0B; }
+
+/* ── Linhas ── */
+.ln { display: block; min-height: 1.6em; }
+.ln.in { animation: ln-in .18s ease both; }
+@keyframes ln-in { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: none; } }
+
+.c-dim    { color: var(--dim); }
+.c-faint  { color: var(--faint); }
+.c-accent { color: var(--accent); }
+.c-blue   { color: var(--info); }
+.c-green  { color: var(--green); }
+.c-red    { color: var(--red); }
+.c-amber  { color: var(--amber); }
+.c-violet { color: var(--accent-2); }
+.b        { font-weight: 700; }
+
+.prompt-user { color: var(--green); }
+.prompt-path { color: var(--info); }
+
+.cursor {
+  display: inline-block;
+  width: .6em;
+  height: 1.15em;
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  background: var(--accent);
+  animation: blink 1s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ── Ações clicáveis (parecem comandos) ── */
+.cmd {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--accent);
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.cmd:hover, .cmd:focus-visible { color: var(--white); background: var(--accent-soft); outline: none; }
+
+a.cmd { text-decoration: underline dotted; }
+
+/* ── Valores ── */
+.metric-name  { color: var(--text); }
+.metric-val   { color: var(--white); font-weight: 700; }
+.metric-unit  { color: var(--dim); }
+.bar-fill     { color: var(--accent); }
+.bar-empty    { color: var(--faint); }
+
+/* ── JSON ── */
+.j-key  { color: var(--info); }
+.j-str  { color: var(--green); }
+.j-num  { color: var(--white); }
+.j-bool { color: var(--accent-2); }
+.j-null { color: var(--dim); }
+
+/* ── Gráficos ── */
+.plots {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 6px 0 10px;
+  white-space: normal;
+}
+.plot { padding: 4px 0; }
+.plot-title { color: var(--dim); font-size: 12px; margin-bottom: 6px; }
+.plot canvas { width: 100% !important; height: 180px !important; }
+
+/* ── Pose ao vivo ── */
+.live {
+  margin: 8px 0 6px;
+  max-width: 760px;
+  white-space: normal;
+}
+.live-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 6px;
+  font-size: 12px;
+  color: var(--dim);
+}
+.rec {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--red);
+  animation: blink 1s steps(1) infinite;
+}
+.live.done .rec { animation: none; background: var(--green); }
+.live img { display: block; width: 100%; height: auto; min-height: 120px; background: #0E0E0E; border: 1px solid var(--line); border-radius: 8px; }
+
+/* ── Player com esqueleto ── */
+.player {
+  margin: 8px 0 6px;
+  max-width: 960px;
+  white-space: normal;
+}
+.player-stage { position: relative; line-height: 0; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.player-stage video { display: block; width: 100%; height: auto; }
+.player-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.player-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 8px 0;
+  font-size: 12px;
+}
+.player-hud { margin-left: auto; color: var(--text); }
+
+@media (prefers-reduced-motion: reduce) {
+  .rec { animation: none; }
+}
+
+/* ── Drag & drop ── */
+.drop-hint {
+  position: absolute;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(18,18,18,.9);
+  border: 2px dashed var(--accent);
+  border-radius: 0;
+  color: var(--accent);
+  font-size: 16px;
+  font-weight: 700;
+  pointer-events: none;
+}
+.term.dragging .drop-hint { display: flex; }
+
+/* ── Responsivo ── */
+@media (max-width: 720px) {
+  body { padding: 0; }
+  .term { border-radius: 0; border: 0; }
+  .term-body { padding: 14px 16px 32px; font-size: 12px; }
+  .plots { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ln.in { animation: none; }
+  .cursor { animation: none; }
+}

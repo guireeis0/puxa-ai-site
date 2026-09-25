@@ -4,754 +4,477 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Puxa.ai — Tecnologia para Vaquejada</title>
-  <meta name="description" content="A primeira plataforma de análise esportiva por vídeo e dados para a vaquejada. Métricas, VAR, Odd's, Hotspot e muito mais.">
-  <link rel="icon" href="assets/icone-app.jpg" type="image/jpeg">
-  <link rel="stylesheet" href="puxa-ai-site/css/style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <meta name="description" content="A primeira plataforma de análise esportiva por vídeo e dados para a vaquejada. Métricas, VAR, Odd's, Hotspot e banco de dados.">
+  <link rel="icon" href="puxa-ai-site/assets/icone-app.jpg" type="image/jpeg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="puxa-ai-site/landing/landing.css">
 </head>
 <body>
 
-  <!-- ========== COUNTDOWN TIMER (BARRA TOPO) ========== -->
-  <div class="countdown-section" id="countdown">
-    <div class="countdown-inner">
-      <span class="countdown-bar-label">Acesso antecipado em</span>
-      <div class="countdown-grid">
-        <div class="countdown-card">
-          <span class="countdown-value" id="cd-days">00</span>
-          <span class="countdown-label">Dias</span>
-        </div>
-        <span class="countdown-sep" aria-hidden="true">:</span>
-        <div class="countdown-card">
-          <span class="countdown-value" id="cd-hours">00</span>
-          <span class="countdown-label">Horas</span>
-        </div>
-        <span class="countdown-sep" aria-hidden="true">:</span>
-        <div class="countdown-card">
-          <span class="countdown-value" id="cd-minutes">00</span>
-          <span class="countdown-label">Min</span>
-        </div>
-        <span class="countdown-sep" aria-hidden="true">:</span>
-        <div class="countdown-card">
-          <span class="countdown-value" id="cd-seconds">00</span>
-          <span class="countdown-label">Seg</span>
-        </div>
-      </div>
-    </div>
-  </div>
+  <!-- Ícones (sprite) -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></symbol>
+      <symbol id="i-id" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="11" r="2.5"/><path d="M5.5 17c.8-1.8 2.1-2.7 3.5-2.7s2.7.9 3.5 2.7"/><path d="M15 9h3M15 13h3"/></symbol>
+      <symbol id="i-video" viewBox="0 0 24 24"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="m16 10 6-3v10l-6-3"/></symbol>
+      <symbol id="i-calc" viewBox="0 0 24 24"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 11h.01M12 11h.01M16 11h.01M8 15h.01M12 15h.01M16 15h.01M8 19h.01M12 19h4"/></symbol>
+      <symbol id="i-map" viewBox="0 0 24 24"><path d="M12 21s-6-5.3-6-10a6 6 0 1 1 12 0c0 4.7-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/></symbol>
+      <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.2 7.5 9.5 4.3-1.3 7.5-4.9 7.5-9.5V6z"/><path d="m9 12 2 2 4-4"/></symbol>
+      <symbol id="i-users" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.8-3.2 3.2-5 6-5s5.2 1.8 6 5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.2c2.3.3 4 1.9 4.5 4.8"/></symbol>
+      <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 10h18"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></symbol>
+      <symbol id="i-report" viewBox="0 0 24 24"><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5M9 17v-3M12 17v-6M15 17v-4"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 19h16"/></symbol>
+      <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></symbol>
+      <symbol id="i-cpu" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+      <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 3 2 20h20z"/><path d="M12 10v4M12 17h.01"/></symbol>
+      <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4v16l13-8z"/></symbol>
+    </defs>
+  </svg>
 
-  <!-- ========== NAVIGATION ========== -->
-  <nav class="navbar">
-    <a href="index.html" class="nav-logo">
-      <img src="puxa-ai-site/assets/logo-horizontal-branco.png" alt="Puxa.ai">
-    </a>
-    <ul class="nav-menu">
-      <li><a href="#recursos">Recursos</a></li>
-      <li><a href="#var">VAR</a></li>
-      <li><a href="#metricas">Métricas</a></li>
-      <li><a href="#odds">Odd's</a></li>
-      <li><a href="#hotspot">Hotspot</a></li>
-      <li><a href="recursos.html">Plataforma</a></li>
-      <li><button class="nav-cta" data-action="open-form">Solicitar Acesso</button></li>
-    </ul>
-    <div class="hamburger">
-      <span></span>
-      <span></span>
-      <span></span>
-    </div>
-  </nav>
-
-  <!-- ========== HERO SECTION ========== -->
-  <section class="hero" id="inicio">
-    <div class="hero-video-container">
-      <img src="puxa-ai-site/assets/image.png" alt="Vaquejada" class="hero-bg-image">
-    </div>
-    <div class="hero-overlay"></div>
-
-    <div class="hero-content fade-in">
-      <div class="hero-badge">
-        <span class="dot"></span>
-        Plataforma em desenvolvimento
-      </div>
-      <h1>
-        A análise esportiva<br>
-        que a Vaquejada <span class="highlight">merece</span>
-      </h1>
-      <p class="hero-subtitle">
-        A primeira plataforma de inteligência de dados e análise por vídeo projetada exclusivamente para a vaquejada. Métricas de desempenho, sistema VAR, Odd's em tempo real e muito mais.
-      </p>
-      <div class="hero-buttons">
-        <button class="btn-primary" data-action="open-form">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="flex-shrink:0"><path d="M8 1a5 5 0 0 0-5 5v1H2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V6a5 5 0 0 0-5-5zm3 6H5V6a3 3 0 0 1 6 0v1z" fill="currentColor"/></svg>
-          Garantir acesso antecipado
+  <!-- ========== NAV ========== -->
+  <header class="navbar" id="topo">
+    <div class="nav-inner">
+      <a href="/" class="nav-logo" aria-label="Puxa.ai — início">
+        <img src="puxa-ai-site/landing/logo-dark.png" alt="Puxa.ai — Tecnologia para Vaquejada">
+      </a>
+      <nav class="nav-links" aria-label="Seções">
+        <a href="#recursos">Recursos</a>
+        <a href="#var">VAR</a>
+        <a href="#metricas">Métricas</a>
+        <a href="#odds">Odd's</a>
+        <a href="#hotspot">Hotspot</a>
+        <a href="#dados">Dados</a>
+      </nav>
+      <div class="nav-actions">
+        <a class="nav-status" href="#contato"><span class="pulse"></span>Beta aberto</a>
+        <a class="btn btn-ghost nav-platform" href="analisar-terminal.html">Plataforma</a>
+        <button class="btn btn-brand" type="button" data-action="open-form">Solicitar acesso</button>
+        <button class="nav-toggle" type="button" aria-label="Abrir menu" aria-expanded="false">
+          <span></span><span></span>
         </button>
       </div>
     </div>
+  </header>
 
-  </section>
+  <main class="frame">
 
-  <!-- ========== MARQUEE / PARCEIROS ========== -->
-  <div class="marquee-section">
-    <div class="marquee-label">Utilizado por organizadores e parceiros</div>
-    <div class="marquee-track-wrapper">
-      <div class="marquee-track">
-        <span class="marquee-brand brand-1">ARENA NORTE</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-2">Haras Cerrado</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-3">VILA COUNTRY</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-4">Rancho Forte</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-5">SERTÃO SPORTS</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-6">Parque das Arenas</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-1">Campo Aberto</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-3">HARAS SUL</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-2">Vaquejada Pro</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-5">ARENA REAL</span>
-        <span class="marquee-dot">·</span>
-        <!-- duplicado para loop contínuo -->
-        <span class="marquee-brand brand-1">ARENA NORTE</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-2">Haras Cerrado</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-3">VILA COUNTRY</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-4">Rancho Forte</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-5">SERTÃO SPORTS</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-6">Parque das Arenas</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-1">Campo Aberto</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-3">HARAS SUL</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-2">Vaquejada Pro</span>
-        <span class="marquee-dot">·</span>
-        <span class="marquee-brand brand-5">ARENA REAL</span>
-        <span class="marquee-dot">·</span>
+    <!-- ========== HERO ========== -->
+    <section class="hero" id="inicio">
+      <div class="hero-card">
+        <div class="hero-dots" aria-hidden="true"></div>
+        <div class="hero-glow" aria-hidden="true"></div>
+        <a class="hero-pill" href="#var">
+          <span>Sistema VAR</span><span class="sep">·</span><span>O primeiro VAR da vaquejada</span>
+          <span class="pill-arrow"><svg><use href="#i-arrow"/></svg></span>
+        </a>
+        <h1>A análise esportiva<br>que a vaquejada <span class="hl">merece</span></h1>
+        <p class="hero-sub">A primeira plataforma de inteligência de dados e análise por vídeo projetada exclusivamente para a vaquejada.<br class="br-desk">Métricas de desempenho, sistema VAR, Odd's em tempo real e muito mais.</p>
+        <div class="hero-cta">
+          <button class="btn btn-white" type="button" data-action="open-form">Garantir acesso antecipado</button>
+          <a class="btn btn-outline" href="analisar-terminal.html">Analisar um vídeo <svg><use href="#i-arrow"/></svg></a>
+        </div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <!-- ========== FEATURES / RECURSOS ========== -->
-  <section class="section section-dark" id="recursos">
-    <div class="container">
-      <div class="section-header fade-in">
-        <span class="section-label">Recursos da Plataforma</span>
-        <h2 class="section-title">
-          Ferramentas que <span class="highlight">Transformam</span><br>a Análise da Vaquejada
-        </h2>
-        <p class="section-subtitle">
-          Cada recurso foi projetado para trazer ao esporte o mesmo nível de profissionalismo e precisão das maiores modalidades do mundo.
-        </p>
+    <!-- ========== PARCEIROS ========== -->
+    <section class="partners" aria-label="Organizadores e parceiros">
+      <p class="partners-label">Utilizado por organizadores e parceiros</p>
+      <div class="marquee">
+        <div class="marquee-track">
+          <span>ARENA NORTE</span><span>Haras Cerrado</span><span>VILA COUNTRY</span><span>Rancho Forte</span><span>SERTÃO SPORTS</span><span>Parque das Arenas</span><span>Campo Aberto</span><span>HARAS SUL</span><span>Vaquejada Pro</span><span>ARENA REAL</span>
+          <span aria-hidden="true">ARENA NORTE</span><span aria-hidden="true">Haras Cerrado</span><span aria-hidden="true">VILA COUNTRY</span><span aria-hidden="true">Rancho Forte</span><span aria-hidden="true">SERTÃO SPORTS</span><span aria-hidden="true">Parque das Arenas</span><span aria-hidden="true">Campo Aberto</span><span aria-hidden="true">HARAS SUL</span><span aria-hidden="true">Vaquejada Pro</span><span aria-hidden="true">ARENA REAL</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== GLOBO + RECURSOS ========== -->
+    <section class="section" id="recursos">
+      <div class="section-head rv">
+        <h2>Uma plataforma. Toda a arena.</h2>
+        <p>Cada recurso foi projetado para trazer ao esporte o mesmo nível de profissionalismo e precisão das maiores modalidades do mundo.</p>
       </div>
 
-      <div class="features-grid">
-        <!-- Feature 1: Métricas do Esporte -->
-        <div class="feature-card fade-in">
-          <div class="feature-icon">
-            <i class="fas fa-chart-line" style="color: var(--laranja-ambar);"></i>
-          </div>
+      <div class="globe-wrap rv">
+        <canvas id="globe" aria-label="Globo mostrando arenas do Nordeste conectadas à plataforma Puxa.ai" role="img"></canvas>
+        <div class="globe-nodes" id="globe-nodes" aria-hidden="true"></div>
+        <div class="globe-callout" id="globe-callout">
+          Do vídeo da arena ao dado<br>em minutos — sem planilha, sem achismo.
+        </div>
+      </div>
+
+      <div class="grid-3 bordered rv">
+        <article class="cell">
+          <svg class="ic"><use href="#i-chart"/></svg>
           <h3>Métricas do Esporte</h3>
           <p>Dados completos de cada prova: tempo de puxada, velocidade de entrada, distância percorrida, taxa de sucesso por faixa e muito mais. A vaquejada traduzida em números.</p>
-          <span class="feature-tag">Analytics</span>
-        </div>
-
-        <!-- Feature 2: Métricas Individualizadas -->
-        <div class="feature-card fade-in">
-          <div class="feature-icon">
-            <i class="fas fa-id-card" style="color: var(--laranja-ambar);"></i>
-          </div>
+        </article>
+        <article class="cell">
+          <svg class="ic"><use href="#i-id"/></svg>
           <h3>Métricas Individualizadas</h3>
           <p>Perfil de desempenho detalhado para cada vaqueiro e cada cavalo. Histórico de provas, evolução temporal, pontos fortes e oportunidades de melhoria.</p>
-          <span class="feature-tag">Performance</span>
-        </div>
-
-        <!-- Feature 3: VAR -->
-        <div class="feature-card fade-in">
-          <div class="feature-icon">
-            <i class="fas fa-video" style="color: var(--laranja-ambar);"></i>
-          </div>
+        </article>
+        <article class="cell">
+          <svg class="ic"><use href="#i-video"/></svg>
           <h3>Sistema VAR</h3>
           <p>O primeiro sistema de Verificação por Vídeo da vaquejada. Múltiplos ângulos, replay em câmera lenta e análise frame a frame para decisões justas e transparentes.</p>
-          <span class="feature-tag">Pioneiro</span>
-        </div>
-
-        <!-- Feature 4: Odd's -->
-        <div class="feature-card fade-in">
-          <div class="feature-icon">
-            <i class="fas fa-calculator" style="color: var(--laranja-ambar);"></i>
-          </div>
+        </article>
+        <article class="cell">
+          <svg class="ic"><use href="#i-calc"/></svg>
           <h3>Odd's Inteligentes</h3>
           <p>Probabilidades calculadas com base em dados históricos, desempenho recente, condições da pista e perfil da dupla. Informação para decisões mais inteligentes.</p>
-          <span class="feature-tag">Data-Driven</span>
-        </div>
-
-        <!-- Feature 5: Mapa Hotspot -->
-        <div class="feature-card fade-in">
-          <div class="feature-icon">
-            <i class="fas fa-map-marked-alt" style="color: var(--laranja-ambar);"></i>
-          </div>
+        </article>
+        <article class="cell">
+          <svg class="ic"><use href="#i-map"/></svg>
           <h3>Mapa Hotspot e Trajeto Aéreo</h3>
           <p>Visualização de cima da arena com mapa de calor e trajeto percorrido pelo boi e pelos cavalos. Identifique padrões, zonas de maior ação e estratégias de posicionamento.</p>
-          <span class="feature-tag">Geoespacial</span>
-        </div>
-
-        <!-- Feature 6: Banco de Dados -->
-        <div class="feature-card fade-in">
-          <div class="feature-icon">
-            <i class="fas fa-database" style="color: var(--laranja-ambar);"></i>
-          </div>
+        </article>
+        <article class="cell">
+          <svg class="ic"><use href="#i-db"/></svg>
           <h3>Banco de Dados Geral</h3>
           <p>Acervo completo de provas, vaqueiros, cavalos e eventos. Consulte resultados históricos, compare desempenhos e acesse o maior banco de dados da vaquejada.</p>
-          <span class="feature-tag">Big Data</span>
+        </article>
+      </div>
+    </section>
+
+    <!-- ========== COMPARATIVO ========== -->
+    <section class="section">
+      <div class="section-head rv">
+        <h2>Por que a Puxa.ai</h2>
+        <p>Cada prova gera dezenas de dados que, até agora, se perdiam na poeira da arena.</p>
+      </div>
+      <div class="split rv">
+        <div class="split-before" aria-label="A vaquejada sem dados">
+          <div class="noise" aria-hidden="true">
+            <span class="note n1"><svg><use href="#i-warn"/></svg>"O boi caiu dentro ou fora da faixa?"</span>
+            <span class="note n2">Sem replay · decisão no olho</span>
+            <span class="note n3">"Qual cavalo rende mais na pista de areia?"</span>
+            <span class="note n4 tag">Sem histórico</span>
+            <span class="note n5">"Quanto tempo levou a puxada?"</span>
+            <span class="note n6">Discussão na comissão</span>
+            <span class="note n7 tag">Sem dados</span>
+            <div class="bars" aria-hidden="true"></div>
+          </div>
+          <h3>Vaquejada<br>“no olho”</h3>
+        </div>
+        <div class="split-after">
+          <h3>Decidida<br>com dados</h3>
+          <div class="split-line" aria-hidden="true"></div>
+          <div class="split-pill"><svg><use href="#i-check"/></svg>Replay frame a frame · decisão transparente</div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- VAR SECTION: TEMPORARIAMENTE DESATIVADA - NÃO EXCLUIR -->
-  <!-- Para reativar: definir VAR_ENABLED = true em puxa-ai-site/js/main.js -->
-  <!-- ========== VAR SECTION ========== -->
-  <section class="section var-section" id="var">
-    <div class="container">
-      <div class="showcase">
-        <div class="showcase-content fade-in-left">
-          <div class="var-badge">
-            <i class="fas fa-shield-alt"></i> Exclusivo Puxa.ai
+    <!-- ========== VAR ========== -->
+    <section class="section" id="var">
+      <div class="section-head rv">
+        <span class="eyebrow">Sistema VAR · Exclusivo Puxa.ai</span>
+        <h2>O primeiro VAR da vaquejada</h2>
+        <p>Assim como o futebol evoluiu com a tecnologia de vídeo, a vaquejada agora conta com seu próprio sistema de verificação.</p>
+      </div>
+      <div class="bento rv">
+        <div class="card card-wide var-card">
+          <div class="var-screen">
+            <div class="cam active"><span>CAM 01</span><i class="rec"></i></div>
+            <div class="cam"><span>CAM 02</span></div>
+            <div class="cam"><span>CAM 03</span></div>
+            <div class="cam"><span>AÉREA</span></div>
+            <div class="var-badge">VAR</div>
           </div>
-          <span class="section-label">Sistema VAR</span>
-          <h2>O Primeiro <span class="highlight">VAR</span> da Vaquejada</h2>
-          <p>
-            Assim como o futebol evoluiu com a tecnologia de vídeo, a vaquejada agora conta com seu próprio sistema de verificação. O VAR da Puxa.ai utiliza múltiplas câmeras posicionadas estrategicamente na arena para capturar cada detalhe da prova.
-          </p>
-          <p>
-            Replay em câmera lenta, análise frame a frame e ângulos exclusivos que permitem uma avaliação precisa e imparcial. Mais transparência, mais justiça, mais profissionalismo.
-          </p>
-          <ul class="showcase-list">
-            <li><span class="check"><i class="fas fa-check"></i></span> Múltiplos ângulos de câmera sincronizados</li>
-            <li><span class="check"><i class="fas fa-check"></i></span> Replay em câmera lenta de alta definição</li>
-            <li><span class="check"><i class="fas fa-check"></i></span> Análise frame a frame com marcações</li>
-            <li><span class="check"><i class="fas fa-check"></i></span> Decisões mais justas e transparentes</li>
-            <li><span class="check"><i class="fas fa-check"></i></span> Integração com transmissão ao vivo</li>
+          <div class="var-controls">
+            <svg class="play"><use href="#i-play"/></svg>
+            <div class="scrub"><div class="scrub-fill"></div><div class="scrub-mark" style="left:62%"></div></div>
+            <span class="mono">00:03:24</span>
+            <span class="speed">0.25x</span>
+          </div>
+          <div class="card-text">
+            <h3>Múltiplas câmeras, uma decisão</h3>
+            <p>O VAR da Puxa.ai utiliza múltiplas câmeras posicionadas estrategicamente na arena para capturar cada detalhe da prova. Replay em câmera lenta, análise frame a frame e ângulos exclusivos que permitem uma avaliação precisa e imparcial.</p>
+          </div>
+        </div>
+        <div class="card card-accent">
+          <svg class="ic ic-accent"><use href="#i-shield"/></svg>
+          <h3>Mais transparência, mais justiça, mais profissionalismo.</h3>
+          <ul class="checks checks-accent">
+            <li><svg><use href="#i-check"/></svg>Múltiplos ângulos de câmera sincronizados</li>
+            <li><svg><use href="#i-check"/></svg>Replay em câmera lenta de alta definição</li>
+            <li><svg><use href="#i-check"/></svg>Análise frame a frame com marcações</li>
+            <li><svg><use href="#i-check"/></svg>Decisões mais justas e transparentes</li>
+            <li><svg><use href="#i-check"/></svg>Integração com transmissão ao vivo</li>
           </ul>
-          <a href="var.html" class="btn-primary">
-            <i class="fas fa-play-circle"></i> Saiba Mais
-          </a>
+          <a class="link-accent" href="var.html">Saiba mais sobre o VAR <svg><use href="#i-arrow"/></svg></a>
         </div>
-        <div class="showcase-image fade-in-right">
-          <div style="background: linear-gradient(135deg, #0d1f35, #1B2A4A); border-radius: 16px; padding: 2rem; position: relative; overflow: hidden;">
-            <!-- VAR Interface Mockup -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-bottom: 1rem;">
-              <div style="background: rgba(255,255,255,0.05); border-radius: 8px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(232,114,42,0.3);">
-                <div style="text-align: center;">
-                  <i class="fas fa-video" style="font-size: 1.5rem; color: var(--laranja-ambar); margin-bottom: 0.3rem;"></i>
-                  <div style="font-family: var(--font-tech); font-size: 0.65rem; color: var(--cinza-medio);">CAM 01</div>
-                </div>
-              </div>
-              <div style="background: rgba(255,255,255,0.05); border-radius: 8px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
-                <div style="text-align: center;">
-                  <i class="fas fa-video" style="font-size: 1.5rem; color: var(--azul-tech); margin-bottom: 0.3rem;"></i>
-                  <div style="font-family: var(--font-tech); font-size: 0.65rem; color: var(--cinza-medio);">CAM 02</div>
-                </div>
-              </div>
-              <div style="background: rgba(255,255,255,0.05); border-radius: 8px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
-                <div style="text-align: center;">
-                  <i class="fas fa-video" style="font-size: 1.5rem; color: var(--azul-tech); margin-bottom: 0.3rem;"></i>
-                  <div style="font-family: var(--font-tech); font-size: 0.65rem; color: var(--cinza-medio);">CAM 03</div>
-                </div>
-              </div>
-              <div style="background: rgba(255,255,255,0.05); border-radius: 8px; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.1);">
-                <div style="text-align: center;">
-                  <i class="fas fa-helicopter" style="font-size: 1.5rem; color: var(--azul-tech); margin-bottom: 0.3rem;"></i>
-                  <div style="font-family: var(--font-tech); font-size: 0.65rem; color: var(--cinza-medio);">AÉREA</div>
-                </div>
-              </div>
-            </div>
-            <!-- Controls bar -->
-            <div style="background: rgba(255,255,255,0.05); border-radius: 8px; padding: 0.8rem 1rem; display: flex; align-items: center; gap: 1rem; border: 1px solid rgba(255,255,255,0.08);">
-              <i class="fas fa-backward" style="color: var(--cinza-medio); font-size: 0.8rem;"></i>
-              <i class="fas fa-play" style="color: var(--laranja-ambar); font-size: 1rem;"></i>
-              <i class="fas fa-forward" style="color: var(--cinza-medio); font-size: 0.8rem;"></i>
-              <div style="flex: 1; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; position: relative;">
-                <div style="width: 45%; height: 100%; background: var(--laranja-ambar); border-radius: 2px;"></div>
-              </div>
-              <span style="font-family: var(--font-tech); font-size: 0.7rem; color: var(--cinza-medio);">00:03:24</span>
-              <span style="font-family: var(--font-tech); font-size: 0.65rem; color: var(--laranja-ambar); background: rgba(232,114,42,0.15); padding: 0.2rem 0.5rem; border-radius: 4px;">0.25x</span>
-            </div>
-            <!-- VAR Badge -->
-            <div style="position: absolute; top: 1rem; right: 1rem; background: rgba(232,114,42,0.9); padding: 0.3rem 0.8rem; border-radius: 4px; font-family: var(--font-tech); font-size: 0.7rem; font-weight: 700; letter-spacing: 2px;">VAR</div>
+      </div>
+    </section>
+
+    <!-- ========== MÉTRICAS ========== -->
+    <section class="section" id="metricas">
+      <div class="section-head rv">
+        <span class="eyebrow">Análise de Desempenho</span>
+        <h2>Métricas que revelam o invisível</h2>
+        <p>A Puxa.ai captura, processa e apresenta métricas detalhadas do esporte, do vaqueiro e do cavalo, transformando informação bruta em inteligência competitiva.</p>
+      </div>
+      <div class="bento bento-rev rv">
+        <div class="card holo-card">
+          <div class="holo-top">
+            <span class="tag-accent">BIOMECÂNICA</span>
+            <span class="holo-meta mono">pose · 39 pontos</span>
+          </div>
+          <div class="holo-stage">
+            <canvas id="holo" role="img" aria-label="Cavalo holográfico galopando: patas destacadas em verde, onde a biomecânica mede passada e ângulos, e o corpo em cinza"></canvas>
+          </div>
+          <div class="holo-legend">
+            <span><i class="lg-legs"></i>Membros · passada, carpo, jarrete</span>
+            <span><i class="lg-body"></i>Corpo · tronco e pescoço</span>
+          </div>
+        </div>
+        <div class="card card-wide an-card">
+          <div class="holo-top">
+            <span class="tag-accent" id="an-title">VELOCIDADE · KM/H</span>
+            <span class="holo-meta mono">por fase da corrida · dados de exemplo</span>
+          </div>
+          <div class="an-view">
+            <canvas id="an-chart" role="img" aria-label="Gráfico de dispersão das medições por fase da corrida, com linhas de percentis P50, P75 e P95"></canvas>
+            <div class="an-tip" id="an-tip" hidden></div>
+          </div>
+          <div class="an-legend">
+            <span><i class="p95"></i>P95</span><span><i class="p75"></i>P75</span><span><i class="p50"></i>P50</span>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- /VAR SECTION -->
+    <!-- ========== ODD'S ========== -->
+    <section class="section" id="odds">
+      <div class="section-head rv">
+        <span class="eyebrow">Inteligência Preditiva</span>
+        <h2>Odd's em tempo real</h2>
+        <p>Probabilidades calculadas por algoritmos proprietários, alimentados por dados históricos e variáveis em tempo real de cada competição.</p>
+      </div>
+      <div class="odds rv">
+        <div class="odds-head">
+          <span class="odds-title">Disputa Profissional — Etapa Arena Norte 2026</span>
+          <span class="live"><i></i>LIVE</span>
+        </div>
+        <div class="odds-row odds-cols">
+          <span>Dupla</span><span>Cavalo (puxador)</span><span>Odd puxada</span><span>Odd classificação</span><span>Tendência</span>
+        </div>
+        <div class="odds-row"><strong>R. Nogueira / L. Campos</strong><span>Relâmpago do Norte</span><span class="odd">1.85</span><span class="odd">2.10</span><span class="trend up">+0.12</span></div>
+        <div class="odds-row"><strong>F. Cavalcanti / M. Silva</strong><span>Trovão da Serra</span><span class="odd">2.30</span><span class="odd">3.15</span><span class="trend down">−0.08</span></div>
+        <div class="odds-row"><strong>J. Almeida / P. Santos</strong><span>Ventania Real</span><span class="odd">3.50</span><span class="odd">4.20</span><span class="trend up">+0.05</span></div>
+        <div class="odds-row"><strong>D. Ferreira / A. Costa</strong><span>Estrela do Sertão</span><span class="odd">4.10</span><span class="odd">5.80</span><span class="trend down">−0.15</span></div>
+        <div class="odds-row faded"><strong>C. Ribeiro / T. Oliveira</strong><span>Furacão de Aço</span><span class="odd">5.25</span><span class="odd">7.40</span><span class="trend up">+0.22</span></div>
+      </div>
+      <p class="disclaimer">* Dados simulados para demonstração. Odd's reais serão calculadas com base em dados históricos verificados.</p>
+    </section>
 
-  <!-- ========== MÉTRICAS SECTION ========== -->
-  <section class="section section-darker" id="metricas">
-    <div class="container">
-      <div class="showcase reverse">
-        <div class="showcase-content fade-in-right">
-          <span class="section-label">Análise de Desempenho</span>
-          <h2>Métricas que <span class="highlight">Revelam</span> o Invisível</h2>
-          <p>
-            Cada prova gera dezenas de dados que, até agora, se perdiam na poeira da arena. A Puxa.ai captura, processa e apresenta métricas detalhadas do esporte, do vaqueiro e do cavalo, transformando informação bruta em inteligência competitiva.
-          </p>
-          <ul class="showcase-list">
-            <li><span class="check"><i class="fas fa-check"></i></span> Tempo de reação na largada</li>
-            <li><span class="check"><i class="fas fa-check"></i></span> Velocidade de aproximação e puxada</li>
-            <li><span class="check"><i class="fas fa-check"></i></span> Taxa de sucesso por faixa</li>
-            <li><span class="check"><i class="fas fa-check"></i></span> Perfil individual de vaqueiro e cavalo</li>
-            <li><span class="check"><i class="fas fa-check"></i></span> Comparativo entre competidores</li>
+    <!-- ========== HOTSPOT ========== -->
+    <section class="section" id="hotspot">
+      <div class="section-head rv">
+        <span class="eyebrow">Visão Aérea</span>
+        <h2>Mapa Hotspot e trajeto</h2>
+        <p>Pela primeira vez na história da vaquejada, é possível visualizar de cima toda a dinâmica da prova.</p>
+      </div>
+      <div class="bento rv">
+        <div class="card card-wide arena-card">
+          <div class="dash-top">
+            <div class="dash-title">Vista aérea — Arena</div>
+            <span class="tag-accent">HOTSPOT ATIVO</span>
+          </div>
+          <div class="arena-stage">
+            <canvas id="arena" role="img" aria-label="Replay animado da prova vista de cima: boi entre o puxador e o esteireiro, mapa de calor e derrubada dentro da faixa de 9 metros"></canvas>
+          </div>
+          <div class="legend">
+            <span><i class="lg-boi"></i>Boi</span>
+            <span><i class="lg-cav"></i>Puxador</span>
+            <span><i class="lg-est"></i>Esteireiro</span>
+            <span><i class="lg-heat"></i>Mapa de calor</span>
+          </div>
+        </div>
+        <div class="card">
+          <svg class="ic"><use href="#i-map"/></svg>
+          <h3>A dinâmica da prova, vista de cima</h3>
+          <p>O mapa de calor revela as zonas de maior concentração de ação, enquanto o trajeto mostra o caminho exato percorrido por cada animal e competidor.</p>
+          <ul class="checks">
+            <li><svg><use href="#i-check"/></svg>Mapa de calor da arena em tempo real</li>
+            <li><svg><use href="#i-check"/></svg>Trajeto do boi e dos cavalos</li>
+            <li><svg><use href="#i-check"/></svg>Zonas de puxada bem-sucedida</li>
+            <li><svg><use href="#i-check"/></svg>Análise de posicionamento estratégico</li>
+            <li><svg><use href="#i-check"/></svg>Exportação de dados geoespaciais</li>
           </ul>
-          <a href="recursos.html#metricas-detail" class="btn-primary">
-            <i class="fas fa-chart-bar"></i> Explorar Métricas
-          </a>
-        </div>
-        <div class="showcase-image fade-in-left">
-          <!-- Metrics Dashboard Mockup -->
-          <div class="metrics-mockup" style="background: linear-gradient(135deg, #0d1f35, #1B2A4A); border-radius: 16px; padding: 2rem; border: 1px solid rgba(255,255,255,0.08);">
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem;">
-              <div>
-                <div style="font-family: var(--font-heading); font-weight: 700; font-size: 1rem;">Dashboard de Prova</div>
-                <div class="metrics-subtitle" style="font-family: var(--font-tech); font-size: 0.7rem; color: var(--cinza-medio);">Etapa Final — Parque Arena Norte</div>
-              </div>
-              <div style="display: flex; gap: 0.5rem; flex-shrink: 0;">
-                <span style="background: rgba(74,222,128,0.15); color: #4ade80; font-family: var(--font-tech); font-size: 0.65rem; padding: 0.2rem 0.6rem; border-radius: 4px;">AO VIVO</span>
-              </div>
-            </div>
-            <!-- Mini metrics -->
-            <div class="metrics-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-bottom: 1.5rem;">
-              <div class="metrics-card" style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; text-align: center;">
-                <div class="metrics-value" style="font-family: var(--font-tech); font-weight: 700; font-size: 1.5rem; color: var(--laranja-ambar);">3.2s</div>
-                <div style="font-size: 0.7rem; color: var(--cinza-medio); margin-top: 0.2rem;">Tempo Médio</div>
-              </div>
-              <div class="metrics-card" style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; text-align: center;">
-                <div class="metrics-value" style="font-family: var(--font-tech); font-weight: 700; font-size: 1.5rem; color: var(--laranja-ambar);">78%</div>
-                <div style="font-size: 0.7rem; color: var(--cinza-medio); margin-top: 0.2rem;">Taxa Sucesso</div>
-              </div>
-              <div class="metrics-card" style="background: rgba(255,255,255,0.04); border-radius: 8px; padding: 1rem; text-align: center;">
-                <div class="metrics-value" style="font-family: var(--font-tech); font-weight: 700; font-size: 1.5rem; color: var(--laranja-ambar);">42km/h</div>
-                <div style="font-size: 0.7rem; color: var(--cinza-medio); margin-top: 0.2rem;">Vel. Máxima</div>
-              </div>
-            </div>
-            <!-- Chart placeholder -->
-            <div style="background: rgba(255,255,255,0.03); border-radius: 8px; padding: 1rem; border: 1px solid rgba(255,255,255,0.05);">
-              <div style="font-size: 0.75rem; color: var(--cinza-medio); margin-bottom: 0.8rem; font-family: var(--font-heading); font-weight: 600;">Desempenho por Rodada</div>
-              <svg viewBox="0 0 400 120" style="width: 100%; height: auto;">
-                <defs>
-                  <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#E8722A" stop-opacity="0.3"/>
-                    <stop offset="100%" stop-color="#E8722A" stop-opacity="0"/>
-                  </linearGradient>
-                </defs>
-                <path d="M0,80 L50,60 L100,70 L150,40 L200,50 L250,25 L300,35 L350,15 L400,20" fill="none" stroke="#E8722A" stroke-width="2"/>
-                <path d="M0,80 L50,60 L100,70 L150,40 L200,50 L250,25 L300,35 L350,15 L400,20 L400,120 L0,120Z" fill="url(#chartGrad)"/>
-                <circle cx="250" cy="25" r="4" fill="#E8722A"/>
-                <circle cx="350" cy="15" r="4" fill="#E8722A"/>
-              </svg>
-            </div>
-          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ========== ODD'S SECTION ========== -->
-  <section class="section section-dark" id="odds">
-    <div class="container">
-      <div class="section-header fade-in">
-        <span class="section-label">Inteligência Preditiva</span>
-        <h2 class="section-title">
-          Odd's em <span class="highlight">Tempo Real</span>
-        </h2>
-        <p class="section-subtitle">
-          Probabilidades calculadas por algoritmos proprietários, alimentados por dados históricos e variáveis em tempo real de cada competição.
-        </p>
+    <!-- ========== BANCO DE DADOS ========== -->
+    <section class="section" id="dados">
+      <div class="section-head rv">
+        <span class="eyebrow">Banco de Dados</span>
+        <h2>O maior acervo da vaquejada</h2>
+        <p>Consulte, compare e analise dados de milhares de provas, vaqueiros e cavalos em uma única plataforma centralizada.</p>
       </div>
-
-      <div class="odds-demo fade-in">
-        <div class="odds-header">
-          <h4><i class="fas fa-trophy" style="color: var(--laranja-ambar); margin-right: 0.5rem;"></i> Disputa Profissional — Etapa Arena Norte 2026</h4>
-          <div class="odds-live">
-            <span class="dot"></span>
-            LIVE
-          </div>
-        </div>
-        <table class="odds-table">
-          <thead>
-            <tr>
-              <th>Dupla</th>
-              <th>Cavalo (Puxador)</th>
-              <th>Odd Puxada</th>
-              <th>Odd Classificação</th>
-              <th>Tendência</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td><strong>R. Nogueira / L. Campos</strong></td>
-              <td>Relâmpago do Norte</td>
-              <td><span class="odds-value">1.85</span></td>
-              <td><span class="odds-value">2.10</span></td>
-              <td><span class="odds-change up"><i class="fas fa-arrow-up"></i> +0.12</span></td>
-            </tr>
-            <tr>
-              <td><strong>F. Cavalcanti / M. Silva</strong></td>
-              <td>Trovão da Serra</td>
-              <td><span class="odds-value">2.30</span></td>
-              <td><span class="odds-value">3.15</span></td>
-              <td><span class="odds-change down"><i class="fas fa-arrow-down"></i> -0.08</span></td>
-            </tr>
-            <tr>
-              <td><strong>J. Almeida / P. Santos</strong></td>
-              <td>Ventania Real</td>
-              <td><span class="odds-value">3.50</span></td>
-              <td><span class="odds-value">4.20</span></td>
-              <td><span class="odds-change up"><i class="fas fa-arrow-up"></i> +0.05</span></td>
-            </tr>
-            <tr>
-              <td><strong>D. Ferreira / A. Costa</strong></td>
-              <td>Estrela do Sertão</td>
-              <td><span class="odds-value">4.10</span></td>
-              <td><span class="odds-value">5.80</span></td>
-              <td><span class="odds-change down"><i class="fas fa-arrow-down"></i> -0.15</span></td>
-            </tr>
-            <tr>
-              <td><strong>C. Ribeiro / T. Oliveira</strong></td>
-              <td>Furacão de Aço</td>
-              <td><span class="odds-value">5.25</span></td>
-              <td><span class="odds-value">7.40</span></td>
-              <td><span class="odds-change up"><i class="fas fa-arrow-up"></i> +0.22</span></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <p style="text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: var(--cinza-medio); font-family: var(--font-tech);">
-        * Dados simulados para demonstração. Odd's reais serão calculadas com base em dados históricos verificados.
-      </p>
-    </div>
-  </section>
-
-  <!-- ========== HOTSPOT / MAPA SECTION ========== -->
-  <section class="section section-darker" id="hotspot">
-    <div class="container">
-      <div class="showcase">
-        <div class="showcase-content fade-in-left">
-          <span class="section-label">Visão Aérea</span>
-          <h2>Mapa <span class="highlight">Hotspot</span> e Trajeto</h2>
-          <p>
-            Pela primeira vez na história da vaquejada, é possível visualizar de cima toda a dinâmica da prova. O mapa de calor revela as zonas de maior concentração de ação, enquanto o trajeto mostra o caminho exato percorrido por cada animal e competidor.
-          </p>
-          <ul class="showcase-list">
-            <li><span class="check"><i class="fas fa-check"></i></span> Mapa de calor da arena em tempo real</li>
-            <li><span class="check"><i class="fas fa-check"></i></span> Trajeto do boi e dos cavalos</li>
-            <li><span class="check"><i class="fas fa-check"></i></span> Zonas de puxada bem-sucedida</li>
-            <li><span class="check"><i class="fas fa-check"></i></span> Análise de posicionamento estratégico</li>
-            <li><span class="check"><i class="fas fa-check"></i></span> Exportação de dados geoespaciais</li>
-          </ul>
-
-        </div>
-        <div class="showcase-image fade-in-right">
-          <!-- Arena Hotspot Mockup -->
-          <div style="background: linear-gradient(135deg, #0d1f35, #1B2A4A); border-radius: 16px; padding: 2rem; border: 1px solid rgba(255,255,255,0.08); position: relative;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-              <div style="font-family: var(--font-heading); font-weight: 700; font-size: 0.9rem;">Vista Aérea — Arena</div>
-              <div style="font-family: var(--font-tech); font-size: 0.65rem; color: var(--laranja-ambar);">HOTSPOT ATIVO</div>
-            </div>
-            <svg viewBox="0 0 500 300" style="width: 100%; border-radius: 8px; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);">
-              <!-- Arena outline -->
-              <rect x="30" y="30" width="440" height="240" rx="8" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-dasharray="5,5"/>
-              <!-- Faixas -->
-              <line x1="180" y1="30" x2="180" y2="270" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-              <line x1="320" y1="30" x2="320" y2="270" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-              <!-- Labels -->
-              <text x="105" y="20" fill="rgba(255,255,255,0.3)" font-size="10" font-family="Space Mono" text-anchor="middle">LARGADA</text>
-              <text x="250" y="20" fill="rgba(255,255,255,0.3)" font-size="10" font-family="Space Mono" text-anchor="middle">PISTA</text>
-              <text x="390" y="20" fill="rgba(255,255,255,0.3)" font-size="10" font-family="Space Mono" text-anchor="middle">FAIXA</text>
-              <!-- Heat spots -->
-              <circle cx="350" cy="150" r="60" fill="rgba(232,114,42,0.25)" class="heat-dot"/>
-              <circle cx="350" cy="150" r="35" fill="rgba(232,114,42,0.35)" class="heat-dot"/>
-              <circle cx="350" cy="150" r="15" fill="rgba(232,114,42,0.5)" class="heat-dot"/>
-              <circle cx="200" cy="120" r="40" fill="rgba(46,91,186,0.2)" class="heat-dot"/>
-              <circle cx="200" cy="120" r="20" fill="rgba(46,91,186,0.3)" class="heat-dot"/>
-              <circle cx="120" cy="150" r="30" fill="rgba(46,91,186,0.15)" class="heat-dot"/>
-              <!-- Trajectory -->
-              <path d="M80,150 C120,140 160,110 200,120 S280,160 350,150 S420,130 450,140" fill="none" stroke="#E8722A" stroke-width="2" stroke-dasharray="4,3" opacity="0.8"/>
-              <path d="M80,160 C130,170 170,130 210,135 S290,170 360,155 S430,145 460,150" fill="none" stroke="#2E5BBA" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
-              <!-- Points -->
-              <circle cx="80" cy="150" r="5" fill="#4ade80"/>
-              <circle cx="450" cy="140" r="5" fill="#f87171"/>
-              <!-- Legend -->
-              <rect x="30" y="275" width="8" height="8" rx="2" fill="#E8722A"/>
-              <text x="42" y="283" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inter">Boi</text>
-              <rect x="80" y="275" width="8" height="8" rx="2" fill="#2E5BBA"/>
-              <text x="92" y="283" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inter">Puxador</text>
-              <rect x="140" y="275" width="8" height="8" rx="2" fill="#4ade80"/>
-              <text x="152" y="283" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inter">Início</text>
-              <rect x="190" y="275" width="8" height="8" rx="2" fill="#f87171"/>
-              <text x="202" y="283" fill="rgba(255,255,255,0.5)" font-size="8" font-family="Inter">Fim</text>
-            </svg>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========== DATABASE SECTION ========== -->
-  <section class="section section-dark" id="database">
-    <div class="container">
-      <div class="section-header fade-in">
-        <span class="section-label">Banco de Dados</span>
-        <h2 class="section-title">
-          O Maior <span class="highlight">Acervo</span> da Vaquejada
-        </h2>
-        <p class="section-subtitle">
-          Consulte, compare e analise dados de milhares de provas, vaqueiros e cavalos em uma única plataforma centralizada.
-        </p>
-      </div>
-
-      <div class="db-features fade-in">
-        <div class="db-card">
-          <div class="db-icon"><i class="fas fa-users"></i></div>
-          <h4>Cadastro de Vaqueiros</h4>
-          <p>Perfil completo com histórico de provas, estatísticas de desempenho e ranking atualizado.</p>
-        </div>
-        <div class="db-card">
-          <div class="db-icon"><i class="fas fa-horse-head"></i></div>
-          <h4>Cadastro de Cavalos</h4>
-          <p>Ficha técnica de cada animal com linhagem, desempenho por pista e compatibilidade com vaqueiros.</p>
-        </div>
-        <div class="db-card">
-          <div class="db-icon"><i class="fas fa-calendar-alt"></i></div>
-          <h4>Histórico de Eventos</h4>
+      <div class="tpl-grid rv">
+        <!-- grandes: com ilustração da tela -->
+        <article class="tpl tpl-lg">
+          <svg class="tpl-ic"><use href="#i-cal"/></svg>
+          <h3>Histórico de Eventos</h3>
           <p>Registro completo de todas as competições com resultados, classificações e estatísticas detalhadas.</p>
-        </div>
-        <div class="db-card">
-          <div class="db-icon"><i class="fas fa-search"></i></div>
-          <h4>Busca Avançada</h4>
-          <p>Filtros inteligentes por nome, região, período, categoria e múltiplos critérios de desempenho.</p>
-        </div>
-        <div class="db-card">
-          <div class="db-icon"><i class="fas fa-chart-pie"></i></div>
-          <h4>Relatórios Analíticos</h4>
+          <div class="mock" aria-hidden="true">
+            <div class="mock-bar"><i></i><i></i><i></i></div>
+            <div class="mock-body mock-table">
+              <div class="mt-head"><b style="width:34%"></b><b style="width:18%"></b><b style="width:14%"></b></div>
+              <div class="mt-row"><b style="width:46%"></b><b style="width:22%"></b><span class="mt-pill"></span></div>
+              <div class="mt-row hl"><b style="width:52%"></b><b style="width:20%"></b><span class="mt-pill on"></span></div>
+              <div class="mt-row"><b style="width:40%"></b><b style="width:24%"></b><span class="mt-pill"></span></div>
+              <div class="mt-row"><b style="width:48%"></b><b style="width:18%"></b><span class="mt-pill"></span></div>
+              <div class="mt-row"><b style="width:36%"></b><b style="width:22%"></b><span class="mt-pill"></span></div>
+            </div>
+          </div>
+        </article>
+        <article class="tpl tpl-lg">
+          <svg class="tpl-ic"><use href="#i-report"/></svg>
+          <h3>Relatórios Analíticos</h3>
           <p>Geração automática de relatórios com gráficos, comparativos e insights baseados em dados.</p>
-        </div>
-        <div class="db-card">
-          <div class="db-icon"><i class="fas fa-cloud-download-alt"></i></div>
-          <h4>Exportação de Dados</h4>
-          <p>Exporte dados em múltiplos formatos para análises externas, apresentações e relatórios personalizados.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ========== TESTIMONIALS ========== -->
-  <section class="section section-darker">
-    <div class="container">
-      <div class="section-header fade-in">
-        <span class="section-label">Depoimentos</span>
-        <h2 class="section-title">
-          O que Dizem os <span class="highlight">Profissionais</span>
-        </h2>
-      </div>
-
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 2rem;">
-        <div class="testimonial-card fade-in">
-          <div class="quote-mark">&ldquo;</div>
-          <blockquote>
-            A vaquejada sempre mereceu esse nível de profissionalismo. A Puxa.ai está trazendo para o nosso esporte o que o futebol já tem há anos. Isso vai mudar completamente a forma como enxergamos cada prova.
-          </blockquote>
-          <div class="testimonial-author">
-            <div class="avatar">RN</div>
-            <div class="info">
-              <h4>Ricardo Nogueira</h4>
-              <p>Vaqueiro Profissional — 15 anos de carreira</p>
+          <div class="mock" aria-hidden="true">
+            <div class="mock-bar"><i></i><i></i><i></i></div>
+            <div class="mock-body mock-dash">
+              <div class="md-side"><span class="md-dot"></span><b></b><b style="width:70%"></b><b style="width:85%"></b><b style="width:60%"></b></div>
+              <div class="md-main">
+                <b class="md-title"></b>
+                <div class="md-tiles">
+                  <div class="md-tile md-chart"><i style="height:38%"></i><i style="height:62%"></i><i style="height:48%"></i><i style="height:80%"></i><i style="height:66%"></i><i style="height:92%"></i></div>
+                  <div class="md-tile"></div><div class="md-tile"></div>
+                  <div class="md-tile"></div><div class="md-tile"></div><div class="md-tile"></div>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div class="testimonial-card fade-in">
-          <div class="quote-mark">&ldquo;</div>
-          <blockquote>
-            Como organizador de eventos, ter acesso a dados em tempo real e um sistema VAR é um divisor de águas. Isso eleva a credibilidade e a transparência de toda a competição.
-          </blockquote>
-          <div class="testimonial-author">
-            <div class="avatar">MC</div>
-            <div class="info">
-              <h4>Marcos Cavalcanti</h4>
-              <p>Organizador — Parque Arena Norte</p>
-            </div>
-          </div>
-        </div>
+        </article>
+        <!-- pequenos -->
+        <article class="tpl"><svg class="tpl-ic"><use href="#i-users"/></svg><h3>Cadastro de Vaqueiros</h3><p>Perfil completo com histórico de provas, estatísticas de desempenho e ranking atualizado.</p></article>
+        <article class="tpl"><svg class="tpl-ic"><use href="#i-id"/></svg><h3>Cadastro de Cavalos</h3><p>Ficha técnica de cada animal com linhagem, desempenho por pista e compatibilidade com vaqueiros.</p></article>
+        <article class="tpl"><svg class="tpl-ic"><use href="#i-search"/></svg><h3>Busca Avançada</h3><p>Filtros inteligentes por nome, região, período, categoria e múltiplos critérios de desempenho.</p></article>
+        <article class="tpl"><svg class="tpl-ic"><use href="#i-download"/></svg><h3>Exportação de Dados</h3><p>Exporte dados em múltiplos formatos para análises externas, apresentações e relatórios personalizados.</p></article>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ========== CTA SECTION ========== -->
-  <section class="cta-section" id="contato">
-    <h2 class="fade-in">Pronto para Elevar a Vaquejada<br>a Outro Patamar?</h2>
-    <p class="fade-in">Solicite acesso antecipado à plataforma e seja um dos primeiros a experimentar o futuro da análise esportiva na vaquejada.</p>
-    <button class="btn-primary fade-in" data-action="open-form">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="flex-shrink:0"><path d="M8 1a5 5 0 0 0-5 5v1H2a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1V6a5 5 0 0 0-5-5zm3 6H5V6a3 3 0 0 1 6 0v1z" fill="currentColor"/></svg>
-      Solicitar Acesso Antecipado
-    </button>
-  </section>
+    <!-- ========== DEPOIMENTOS ========== -->
+    <section class="section">
+      <div class="section-head rv">
+        <h2>O que dizem os profissionais</h2>
+      </div>
+      <div class="grid-2 bordered rv">
+        <figure class="cell quote">
+          <blockquote>“A vaquejada sempre mereceu esse nível de profissionalismo. A Puxa.ai está trazendo para o nosso esporte o que o futebol já tem há anos. Isso vai mudar completamente a forma como enxergamos cada prova.”</blockquote>
+          <figcaption><span class="avatar">RN</span><span><strong>Ricardo Nogueira</strong><small>Vaqueiro Profissional — 15 anos de carreira</small></span></figcaption>
+        </figure>
+        <figure class="cell quote">
+          <blockquote>“Como organizador de eventos, ter acesso a dados em tempo real e um sistema VAR é um divisor de águas. Isso eleva a credibilidade e a transparência de toda a competição.”</blockquote>
+          <figcaption><span class="avatar">MC</span><span><strong>Marcos Cavalcanti</strong><small>Organizador — Parque Arena Norte</small></span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- ========== CTA ========== -->
+    <section class="section" id="contato">
+      <div class="cta-card rv">
+        <div class="hero-dots" aria-hidden="true"></div>
+        <div class="hero-glow" aria-hidden="true"></div>
+        <h2>Pronto para elevar a vaquejada<br>a outro patamar?</h2>
+        <p>Solicite acesso antecipado à plataforma e seja um dos primeiros a experimentar o futuro da análise esportiva na vaquejada.</p>
+        <button class="btn btn-white" type="button" data-action="open-form">Solicitar acesso antecipado</button>
+      </div>
+    </section>
+
+  </main>
 
   <!-- ========== FOOTER ========== -->
   <footer class="footer">
-    <div class="footer-grid">
+    <div class="footer-inner">
       <div class="footer-brand">
-        <img src="puxa-ai-site/assets/logo-horizontal-branco.png" alt="Puxa.ai">
+        <img src="puxa-ai-site/landing/logo-dark.png" alt="Puxa.ai — Tecnologia para Vaquejada">
         <p>Tecnologia de ponta para a vaquejada. Inovação, seriedade e confiabilidade para o esporte que é paixão de milhões de brasileiros.</p>
       </div>
       <div class="footer-col">
         <h4>Plataforma</h4>
-        <ul>
-          <li><a href="#recursos">Recursos</a></li>
-          <li><a href="#var">Sistema VAR</a></li>
-          <li><a href="#metricas">Métricas</a></li>
-          <li><a href="#odds">Odd's</a></li>
-          <li><a href="#hotspot">Hotspot</a></li>
-        </ul>
+        <a href="#recursos">Recursos</a><a href="#var">Sistema VAR</a><a href="#metricas">Métricas</a><a href="#odds">Odd's</a><a href="#hotspot">Hotspot</a>
       </div>
       <div class="footer-col">
         <h4>Empresa</h4>
-        <ul>
-          <li><a href="recursos.html">Sobre a Plataforma</a></li>
-          <li><a href="#">Blog</a></li>
-          <li><a href="#">Carreiras</a></li>
-          <li><a href="#">Imprensa</a></li>
-        </ul>
+        <a href="#recursos">Sobre a Plataforma</a><a href="#">Blog</a><a href="#">Carreiras</a><a href="#">Imprensa</a>
       </div>
       <div class="footer-col">
         <h4>Contato</h4>
-        <ul>
-          <li><a href="mailto:contato@puxa.ai">contato@puxa.ai</a></li>
-          <li><a href="#">Instagram</a></li>
-          <li><a href="#">LinkedIn</a></li>
-          <li><a href="#">YouTube</a></li>
-        </ul>
+        <a href="mailto:contato@puxa.ai">contato@puxa.ai</a><a href="#">Instagram</a><a href="#">LinkedIn</a><a href="#">YouTube</a>
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2026 Puxa.ai — Todos os direitos reservados.</p>
-      <span class="tech-text">Puxa<span style="color: var(--laranja-ambar);">.ai</span> // Tecnologia para Vaquejada</span>
+      <span>© 2026 Puxa.ai — Todos os direitos reservados.</span>
+      <span class="mono">Puxa.ai // Tecnologia para Vaquejada</span>
     </div>
   </footer>
 
-  <!-- ========== MODAL FORMULÁRIO: ACESSO ANTECIPADO ========== -->
+  <!-- ========== MODAL: ACESSO ANTECIPADO (mesmos IDs do main.js) ========== -->
   <div class="modal-overlay" id="modal-form" role="dialog" aria-modal="true" aria-labelledby="form-dialog-title">
     <div class="modal-box">
-      <button class="modal-close" id="modal-close" aria-label="Fechar formulário">
-        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-          <path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-        </svg>
+      <button class="modal-close" id="modal-close" type="button" aria-label="Fechar formulário">
+        <svg viewBox="0 0 14 14"><path d="M1 1L13 13M13 1L1 13"/></svg>
       </button>
+      <div class="form-progress-bar" role="progressbar" aria-label="Progresso do formulário"><div class="form-progress-fill" id="form-progress"></div></div>
 
-      <div class="form-progress-bar" role="progressbar" aria-label="Progresso do formulário">
-        <div class="form-progress-fill" id="form-progress"></div>
-      </div>
-
-      <!-- Etapa 1: Nome -->
       <div class="form-step" id="step-1">
         <span class="form-step-label">Etapa 1 de 4</span>
-        <h2 class="form-step-title" id="form-dialog-title">Como podemos<br>te chamar?</h2>
+        <h2 class="form-step-title" id="form-dialog-title">Como podemos te chamar?</h2>
         <p class="form-step-subtitle">Informe seu nome completo para personalizar sua experiência.</p>
         <input type="text" class="form-field" id="field-1" placeholder="Seu nome completo" autocomplete="name">
         <span class="form-error-msg" id="error-1" role="alert"></span>
-        <div class="form-actions">
-          <button class="btn-form-next" type="button">
-            Continuar
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8H13M13 8L8.5 3.5M13 8L8.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
+        <div class="form-actions"><button class="btn btn-brand btn-form-next" type="button">Continuar <svg><use href="#i-arrow"/></svg></button></div>
       </div>
-
-      <!-- Etapa 2: E-mail -->
       <div class="form-step hidden" id="step-2">
         <span class="form-step-label">Etapa 2 de 4</span>
-        <h2 class="form-step-title">Qual seu<br>e-mail?</h2>
+        <h2 class="form-step-title">Qual seu e-mail?</h2>
         <p class="form-step-subtitle">Usaremos para comunicações importantes sobre seu acesso.</p>
         <input type="email" class="form-field" id="field-2" placeholder="seu@email.com" autocomplete="email" inputmode="email">
         <span class="form-error-msg" id="error-2" role="alert"></span>
-        <div class="form-actions">
-          <button class="btn-form-back" type="button">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8H3M3 8L7.5 3.5M3 8L7.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Voltar
-          </button>
-          <button class="btn-form-next" type="button">
-            Continuar
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8H13M13 8L8.5 3.5M13 8L8.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
+        <div class="form-actions"><button class="btn btn-ghost btn-form-back" type="button">Voltar</button><button class="btn btn-brand btn-form-next" type="button">Continuar <svg><use href="#i-arrow"/></svg></button></div>
       </div>
-
-      <!-- Etapa 3: WhatsApp -->
       <div class="form-step hidden" id="step-3">
         <span class="form-step-label">Etapa 3 de 4</span>
-        <h2 class="form-step-title">Seu número<br>de WhatsApp</h2>
+        <h2 class="form-step-title">Seu número de WhatsApp</h2>
         <p class="form-step-subtitle">Entraremos em contato por aqui quando sua conta for liberada.</p>
         <input type="tel" class="form-field" id="field-3" placeholder="(00) 00000-0000" autocomplete="tel" inputmode="numeric">
         <span class="form-error-msg" id="error-3" role="alert"></span>
-        <div class="form-actions">
-          <button class="btn-form-back" type="button">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8H3M3 8L7.5 3.5M3 8L7.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Voltar
-          </button>
-          <button class="btn-form-next" type="button">
-            Continuar
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8H13M13 8L8.5 3.5M13 8L8.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
+        <div class="form-actions"><button class="btn btn-ghost btn-form-back" type="button">Voltar</button><button class="btn btn-brand btn-form-next" type="button">Continuar <svg><use href="#i-arrow"/></svg></button></div>
       </div>
-
-      <!-- Etapa 4: Instagram -->
       <div class="form-step hidden" id="step-4">
         <span class="form-step-label">Etapa 4 de 4</span>
-        <h2 class="form-step-title">Perfil do<br>Instagram</h2>
+        <h2 class="form-step-title">Perfil do Instagram</h2>
         <p class="form-step-subtitle">Isso agiliza a análise do seu perfil e a aprovação do acesso.</p>
         <input type="text" class="form-field" id="field-4" placeholder="@seu.perfil" autocomplete="off">
         <span class="form-error-msg" id="error-4" role="alert"></span>
-        <div class="form-actions">
-          <button class="btn-form-back" type="button">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13 8H3M3 8L7.5 3.5M3 8L7.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Voltar
-          </button>
-          <button class="btn-form-next" type="button">
-            Finalizar cadastro
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M2 8h9M7.5 4L12 8l-4.5 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </button>
-        </div>
+        <div class="form-actions"><button class="btn btn-ghost btn-form-back" type="button">Voltar</button><button class="btn btn-brand btn-form-next" type="button">Finalizar cadastro <svg><use href="#i-arrow"/></svg></button></div>
       </div>
-
-      <!-- Tela de confirmação -->
       <div class="form-step hidden" id="step-success">
         <div class="form-success">
-          <div class="success-icon">
-            <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
-              <path d="M7 18L14 25L29 11" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <h2 class="form-step-title" style="text-align:center;font-size:1.4rem;margin-bottom:0.8rem;">Você está na lista.</h2>
-          <p>Seu perfil está em análise. Entraremos em contato pelo <span class="success-highlight">WhatsApp informado</span> assim que sua conta for liberada. Bem-vindo ao futuro da vaquejada.</p>
-          <button class="btn-primary" id="success-close" type="button" style="margin-top:1.5rem;width:100%;justify-content:center;">
-            Voltar à página principal
-          </button>
+          <div class="success-icon"><svg><use href="#i-check"/></svg></div>
+          <h2 class="form-step-title">Você está na lista.</h2>
+          <p>Seu perfil está em análise. Entraremos em contato pelo WhatsApp informado assim que sua conta for liberada. Bem-vindo ao futuro da vaquejada.</p>
+          <button class="btn btn-brand" id="success-close" type="button">Voltar à página principal</button>
         </div>
       </div>
-
     </div>
   </div>
 
+  <!-- Globo: d3-geo (projeção ortográfica) + contorno dos continentes (world-atlas) -->
+  <script src="https://cdn.jsdelivr.net/npm/d3-array@3/dist/d3-array.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3-geo@3/dist/d3-geo.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
   <script type="module" src="puxa-ai-site/js/main.js"></script>
+  <script type="module" src="puxa-ai-site/landing/landing.js"></script>
 </body>
 </html>

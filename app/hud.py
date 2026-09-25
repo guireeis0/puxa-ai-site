@@ -127,16 +127,21 @@ def draw_hud(
     speed_kmh: float,
     accel_m_s2: float,
     max_speed: float = None,
-    max_accel_for_bar: float = 20.0
+    max_accel_for_bar: float = 20.0,
+    smooth: bool = True,
 ):
     global _smooth_speed, _smooth_accel
 
     x, y = int(x), int(y)
 
-    # Suavização EMA (0.92 = filtra tremidas, mas responde rápido)
-    alpha = 0.92
-    _smooth_speed = (alpha * _smooth_speed) + ((1 - alpha) * speed_kmh)
-    _smooth_accel = (alpha * _smooth_accel) + ((1 - alpha) * accel_m_s2)
+    if smooth:
+        # Suavização EMA (0.92 = filtra tremidas, mas responde rápido)
+        alpha = 0.92
+        _smooth_speed = (alpha * _smooth_speed) + ((1 - alpha) * speed_kmh)
+        _smooth_accel = (alpha * _smooth_accel) + ((1 - alpha) * accel_m_s2)
+    else:
+        # valores já filtrados (sem atraso) pelo motor de cinemática
+        _smooth_speed, _smooth_accel = speed_kmh, accel_m_s2
 
     # Texto Velocidade com Borda
     _draw_text_with_outline(frame, f"{_smooth_speed:.1f}", (x + 10, y - 65), FONT_MAIN, 1.5, COLOR_WHITE, 3)

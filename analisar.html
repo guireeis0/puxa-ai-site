@@ -5,12 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Análise Biomecânica — Puxa.ai</title>
   <script>
-    const ACCESS_RESTRICTED = true; // false = libera acesso geral no lançamento oficial
+    const ACCESS_RESTRICTED = false; // false = libera acesso geral no lançamento oficial
 
-    const API_BASE = 'https://guireeis0-puxa-ai-var.hf.space';
+    const API_BASE = 'https://preventing-felt-dive-targeted.trycloudflare.com';
 
     (async () => {
-      if (!ACCESS_RESTRICTED) return;
+      const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      if (!ACCESS_RESTRICTED || IS_LOCAL) return;
       document.documentElement.style.visibility = 'hidden';
       const token = new URLSearchParams(window.location.search).get('token');
       if (!token) { window.location.href = '/?acesso=negado'; return; }

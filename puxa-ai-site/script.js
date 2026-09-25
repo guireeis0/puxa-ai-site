@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // === CONFIG ===
   const API_BASE = window.location.hostname === "localhost"
     ? "http://localhost:5000"
-    : "https://guireeis0-puxa-ai-var.hf.space";
+    : "https://preventing-felt-dive-targeted.trycloudflare.com";
 
   // === DOM ===
   const dropZone       = document.getElementById("dropZone");

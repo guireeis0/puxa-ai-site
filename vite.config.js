@@ -22,8 +22,10 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
+        antigo: resolve(__dirname, 'index-antigo.html'),
         var: resolve(__dirname, 'var.html'),
         analisar: resolve(__dirname, 'analisar.html'),
+        analisarTerminal: resolve(__dirname, 'analisar-terminal.html'),
         admin: resolve(__dirname, 'admin.html'),
       },
     },

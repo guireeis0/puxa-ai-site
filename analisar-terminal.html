@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puxa.ai Terminal</title>
+  <script>
+    const ACCESS_RESTRICTED = false; // false = libera acesso geral no lançamento oficial
+
+    const API_BASE = 'https://preventing-felt-dive-targeted.trycloudflare.com';
+
+    (async () => {
+      const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+      if (!ACCESS_RESTRICTED || IS_LOCAL) return;
+      document.documentElement.style.visibility = 'hidden';
+      const token = new URLSearchParams(window.location.search).get('token');
+      if (!token) { window.location.href = '/?acesso=negado'; return; }
+      try {
+        const r = await fetch(`${API_BASE}/validate-token?token=${encodeURIComponent(token)}`);
+        if (!r.ok) { window.location.href = '/?acesso=expirado'; return; }
+      } catch { window.location.href = '/?acesso=erro'; return; }
+      document.documentElement.style.visibility = 'visible';
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="puxa-ai-site/terminal.css">
+</head>
+<body>
+
+  <div class="term" id="term">
+    <main class="term-body" id="out" aria-live="polite"></main>
+
+    <div class="drop-hint" id="dropHint">solte o vídeo para iniciar a análise</div>
+  </div>
+
+  <input type="file" id="fileInput" accept="video/*,.mp4,.mov,.avi,.mkv" hidden>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script type="module" src="puxa-ai-site/terminal.js"></script>
+</body>
+</html>
