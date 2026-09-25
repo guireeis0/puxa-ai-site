@@ -170,6 +170,20 @@ a.cmd { text-decoration: underline dotted; }
 }
 .player-hud { margin-left: auto; color: var(--text); }
 
+/* ── Holograma do movimento captado ── */
+.holo { margin: 8px 0 6px; max-width: 960px; white-space: normal; }
+.holo-stage {
+  position: relative; height: 360px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden;
+  background: radial-gradient(ellipse 60% 70% at 50% 75%, rgba(62,207,142,.07), transparent 70%), #0E0E0E;
+}
+.holo-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.holo-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 8px 0; font-size: 12px; color: var(--text); }
+.holo-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 7px; background: #A0A0A0; vertical-align: 0; }
+.holo-legend i.g { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+.holo-legend i.e { background: transparent; border: 1px solid rgba(62,207,142,.5); }
+.holo-legend .c-dim { margin-left: auto; }
+@media (max-width: 640px) { .holo-stage { height: 260px; } .holo-legend .c-dim { margin-left: 0; } }
+
 @media (prefers-reduced-motion: reduce) {
   .rec { animation: none; }
 }

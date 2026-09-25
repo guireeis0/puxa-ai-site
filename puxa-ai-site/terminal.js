@@ -561,6 +561,168 @@ document.addEventListener("DOMContentLoaded", () => {
     return frames;
   }
 
+  // === HOLOGRAMA: o movimento captado, sem o vídeo, no estilo da landing ===
+  // Juntas usadas na análise (ombro/quadril, carpo/jarrete, casco) ficam verdes; o resto do corpo, cinza.
+  const HOLO_JOINT = /^(front|back)_(left|right)_(thai|knee|paw)$/;
+  const TRUNK = ["neck_base", "back_base", "back_middle", "back_end", "tail_base",
+                 "front_left_thai", "front_right_thai", "back_left_thai", "back_right_thai"];
+  const HOLO_SKIP = /eye|jaw|throat|belly|body_middle/;   // pontos pouco estáveis nesse vídeo: soltos no ar
+  const HOLO_SPINE = ["nose", "neck_end", "neck_base", "back_base", "back_middle", "back_end", "tail_base", "tail_end"];
+  const median = arr => { const s = arr.filter(v => isFinite(v)).sort((a, b) => a - b); return s.length ? s[s.length >> 1] : NaN; };
+
+  // Preenche falhas curtas de cada ponto por interpolação linear entre o frame anterior e o seguinte.
+  // Pontos estimados vão em est[i] para serem desenhados apagados (verde forte = captado de fato).
+  function fillGaps(frames, maxGap) {
+    const n = frames.length, parts = new Set(frames.flatMap(p => Object.keys(p)));
+    const out = frames.map(p => ({ ...p })), est = frames.map(() => new Set());
+    for (const part of parts) {
+      let prev = -1;
+      for (let i = 0; i < n; i++) {
+        if (!frames[i][part]) continue;
+        if (prev >= 0 && i - prev > 1 && i - prev <= maxGap) {
+          const a = frames[prev][part], b = frames[i][part];
+          for (let j = prev + 1; j < i; j++) {
+            const u = (j - prev) / (i - prev);
+            out[j][part] = [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u];
+            est[j].add(part);
+          }
+        }
+        prev = i;
+      }
+    }
+    return { frames: out, est };
+  }
+
+  function createHologram(captured_, near, fps) {
+    const { frames, est } = fillGaps(captured_, Math.round(fps * 0.5));
+    const n = frames.length;
+    // escala fixa pelo comprimento do tronco no vídeo todo (o holograma não "respira" com o zoom da câmera)
+    // escala por frame: comprimento do tronco em mediana móvel de ~1 s (acompanha o zoom da câmera
+    // sem tremer); o holograma fica sempre do mesmo tamanho
+    const trunk = frames.map(p => p.neck_base && p.back_end ? Math.hypot(p.neck_base[0] - p.back_end[0], p.neck_base[1] - p.back_end[1]) : NaN);
+    const bodyLen = median(trunk) || 100;
+    const half = Math.max(3, Math.round(fps * 0.5));
+    const lens = trunk.map((_, i) => median(trunk.slice(Math.max(0, i - half), i + half + 1)) || bodyLen);
+    // centro do tronco por frame, com lacunas preenchidas e suavizado: o cavalo galopa no lugar
+    let last = null;
+    const raw = frames.map(p => {
+      const c = TRUNK.filter(k => p[k]);
+      if (c.length) last = [c.reduce((s, k) => s + p[k][0], 0) / c.length, c.reduce((s, k) => s + p[k][1], 0) / c.length];
+      return last;
+    });
+    const firstC = raw.find(Boolean) || [0, 0];
+    const centers = raw.map((_, i) => {
+      let sx = 0, sy = 0, m = 0;
+      for (let j = Math.max(0, i - 3); j <= Math.min(n - 1, i + 3); j++) { const c = raw[j] || firstC; sx += c[0]; sy += c[1]; m++; }
+      return [sx / m, sy / m];
+    });
+    // sempre olhando para a direita; altura do piso = queda mediana até o casco mais baixo
+    const flip = median(frames.map(p => p.nose && p.back_end ? p.nose[0] - p.back_end[0] : NaN)) < 0;
+    const legRatio = median(frames.map((p, i) => Math.max(...Object.keys(p).filter(k => k.endsWith("_paw")).map(k => p[k][1] - centers[i][1]), -Infinity) / lens[i])) || 1;
+    const captured = captured_.filter(p => Object.keys(p).filter(k => HOLO_JOINT.test(k)).length >= 8).length;
+
+    const el = document.createElement("div");
+    el.className = "holo";
+    el.innerHTML = `
+      <div class="holo-stage"><canvas role="img" aria-label="Holograma do movimento do cavalo captado no vídeo"></canvas></div>
+      <div class="holo-legend">
+        <span><i class="g"></i>juntas analisadas · ombro, carpo, jarrete, casco</span>
+        <span><i></i>corpo</span>
+        <span><i class="e"></i>estimado entre frames</span>
+        <span class="c-dim">${captured} de ${n} frames com os membros captados</span>
+      </div>`;
+    const canvas = el.querySelector("canvas"), ctx = canvas.getContext("2d");
+    let lastValid = Math.max(0, frames.findIndex(p => Object.keys(p).length >= 4));
+
+    // Coluna ligada pelos pontos que existirem no frame: o modelo raramente capta
+    // back_base/neck_end, e ligar só pares vizinhos deixaria o tronco sem linha.
+    function segments(pts) {
+      const chain = HOLO_SPINE.filter(k => pts[k]);
+      const segs = chain.slice(1).map((k, i) => [chain[i], k, 2.4]);
+      for (const [a, b] of SKELETON) if ((HOLO_JOINT.test(a) || HOLO_JOINT.test(b)) && pts[a] && pts[b]) segs.push([a, b, 2]);
+      return segs;
+    }
+
+    function skeleton(pts, map, alpha, joints, guess = new Set()) {
+      // segmentos como matriz de pontos (mesmo visual do holograma da landing)
+      for (const [a, b, size] of segments(pts)) {
+        const [x0, y0] = map(pts[a]), [x1, y1] = map(pts[b]);
+        const green = HOLO_JOINT.test(a) || HOLO_JOINT.test(b);
+        const al = guess.has(a) || guess.has(b) ? alpha * 0.4 : alpha;
+        ctx.fillStyle = green ? `rgba(62,207,142,${al})` : `rgba(165,165,165,${al * 0.85})`;
+        const steps = Math.max(1, Math.hypot(x1 - x0, y1 - y0) / 3.2);
+        for (let i = 0; i <= steps; i++) ctx.fillRect(x0 + (x1 - x0) * i / steps - size / 2, y0 + (y1 - y0) * i / steps - size / 2, size, size);
+      }
+      if (!joints) return;
+      for (const [p, xy] of Object.entries(pts)) {
+        if (SKIP_DOTS.test(p) || HOLO_SKIP.test(p)) continue;
+        const [x, y] = map(xy), green = HOLO_JOINT.test(p);
+        if (guess.has(p)) {   // estimado: anel apagado, sem brilho
+          ctx.beginPath(); ctx.arc(x, y, green ? 3.2 : 2, 0, Math.PI * 2);
+          ctx.lineWidth = 1; ctx.strokeStyle = green ? "rgba(62,207,142,0.45)" : "rgba(160,160,160,0.4)"; ctx.stroke();
+          continue;
+        }
+        ctx.beginPath(); ctx.arc(x, y, green ? 3.6 : 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = green ? "#6EE7B7" : "rgba(200,200,200,0.8)";
+        ctx.shadowColor = green ? "rgba(62,207,142,0.9)" : "transparent"; ctx.shadowBlur = green ? 12 : 0;
+        ctx.fill(); ctx.shadowBlur = 0;
+      }
+    }
+
+    function draw(f, now) {
+      const W = canvas.clientWidth, H = canvas.clientHeight;
+      if (!W) return;
+      const dpr = window.devicePixelRatio || 1;
+      if (canvas.width !== Math.round(W * dpr)) { canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr); }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, W, H);
+      const t = now / 1000;
+      const unit = Math.min(W * 0.3, H * 0.5);          // tamanho do tronco na tela
+      const floor = H * 0.8, cx = W / 2, cy = floor - legRatio * unit;
+
+      // piso: anéis pulsando + grade em perspectiva
+      const r = unit * 1.5;
+      for (let i = 0; i < 4; i++) {
+        const o = 1 - i * 0.2;
+        ctx.strokeStyle = `rgba(62,207,142,${(0.1 + 0.1 * (0.5 + 0.5 * Math.sin(t * 1.6 - i))) * o})`;
+        ctx.beginPath(); ctx.ellipse(cx, floor + 2, r * o, r * 0.16 * o, 0, 0, Math.PI * 2); ctx.stroke();
+      }
+      ctx.strokeStyle = "rgba(255,255,255,0.05)";
+      for (let i = -6; i <= 6; i++) { ctx.beginPath(); ctx.moveTo(cx + i * r * 0.18, floor); ctx.lineTo(cx + i * r * 0.42, H); ctx.stroke(); }
+      for (let i = 1; i <= 4; i++) { const y = floor + (H - floor) * (i / 5) ** 1.6; ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+
+      if (Object.keys(frames[f] || {}).length >= 4) lastValid = f;
+      const fi = lastValid, pts = frames[fi] || {};
+      const mapFor = i => { const k = unit / lens[i]; return ([x, y]) => [cx + (x - centers[i][0]) * k * (flip ? -1 : 1), cy + (y - centers[i][1]) * k]; };
+      const map = mapFor(fi);
+
+      // rastro dos frames anteriores
+      for (let j = 4; j >= 1; j--) { const g = fi - j * 2; if (g >= 0 && frames[g]) skeleton(frames[g], mapFor(g), 0.07 * (5 - j), false); }
+      // reflexo no piso
+      const m0 = map;
+      skeleton(pts, xy => { const [x, y] = m0(xy); return [x, floor + (floor - y) * 0.45]; }, 0.12, false);
+      skeleton(pts, map, 0.95, true, est[fi]);
+
+      // ângulos do lado da câmera junto das juntas
+      ctx.font = `500 11px "JetBrains Mono", monospace`; ctx.fillStyle = "#6EE7B7";
+      for (const [name, tri] of [["carpo", ["thai", "knee", "paw"].map(s => `front_${near}_${s}`)], ["jarrete", ["thai", "knee", "paw"].map(s => `back_${near}_${s}`)]]) {
+        if (!tri.every(q => pts[q] && !est[fi].has(q))) continue;   // ângulo só com pontos captados
+        const [x, y] = map(pts[tri[1]]);
+        ctx.fillText(`${name} ${angleAt(...tri.map(q => pts[q])).toFixed(0)}°`, x + 9, y + 4);
+      }
+
+      // varredura + linhas de TV
+      const sy = (t % 3.2) / 3.2 * (H + 40) - 20;
+      const gr = ctx.createLinearGradient(0, sy - 14, 0, sy + 14);
+      gr.addColorStop(0, "rgba(62,207,142,0)"); gr.addColorStop(0.5, "rgba(62,207,142,0.12)"); gr.addColorStop(1, "rgba(62,207,142,0)");
+      ctx.fillStyle = gr; ctx.fillRect(0, sy - 14, W, 28);
+      ctx.fillStyle = "rgba(0,0,0,0.12)";
+      for (let y = 0; y < H; y += 3) ctx.fillRect(0, y, W, 1);
+      if (fi !== f) { ctx.fillStyle = "#707070"; ctx.fillText("sem captação neste frame · mantendo o último", 12, 20); }
+    }
+    return { el, draw };
+  }
+
   function angleAt(a, b, c) {
     const v1 = [a[0] - b[0], a[1] - b[1]], v2 = [c[0] - b[0], c[1] - b[1]];
     const cos = (v1[0] * v2[0] + v1[1] * v2[1]) / (Math.hypot(...v1) * Math.hypot(...v2));
@@ -598,6 +760,11 @@ document.addEventListener("DOMContentLoaded", () => {
       </div>`;
     block(wrap);
 
+    line("");
+    line(`${PROMPT}puxa bio --holo`);
+    const holo = createHologram(frames, near, fps);
+    block(holo.el);
+
     const video  = wrap.querySelector("video");
     const canvas = wrap.querySelector("canvas");
     const hud    = wrap.querySelector(".player-hud");
@@ -620,6 +787,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       const f = Math.min(frames.length - 1, Math.max(0, Math.round(mediaTime * fps)));
       const pts = frames[f] || {};
+      holo.draw(f, performance.now());
       ctx.lineCap = "round";
       const segs = SKELETON.filter(([a, b]) => pts[a] && pts[b]);
       const seg = ([a, b]) => { ctx.beginPath(); ctx.moveTo(pts[a][0] * s, pts[a][1] * s); ctx.lineTo(pts[b][0] * s, pts[b][1] * s); ctx.stroke(); };
