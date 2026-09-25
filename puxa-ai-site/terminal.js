@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // === CONFIG ===
   const API_BASE = window.location.hostname === "localhost"
     ? "http://localhost:5000"
-    : "https://preventing-felt-dive-targeted.trycloudflare.com";
+    : "https://gibraltar-slope-bacteria-thereby.trycloudflare.com";
 
   const MAX_FILE_BYTES = 100 * 1024 * 1024; // 100 MB — igual ao backend
   const TIMEOUT_MS     = 25 * 60 * 1000; // biomecânica (pose) pode levar alguns minutos
